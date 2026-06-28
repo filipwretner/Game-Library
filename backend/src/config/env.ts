@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 /**
  * Typed environment, validated once at boot (spec §7.2 config/). Inner layers
- * read this object, never `process.env`. IGDB creds are optional now and become
- * required at Milestone 2 (IGDB proxy).
+ * read this object, never `process.env`. IGDB creds are required to start the
+ * backend (validated when the container wires the metadata provider).
  */
 const DEFAULT_PORT = 3001;
 
@@ -13,7 +13,6 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   IGDB_CLIENT_ID: z.string().optional(),
   IGDB_CLIENT_SECRET: z.string().optional(),
-  PRICE_CURRENCY: z.string().default('USD'),
 });
 
 export type Env = z.infer<typeof envSchema>;

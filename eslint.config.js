@@ -113,17 +113,36 @@ export default tseslint.config(
     },
   },
 
-  // frontend components/: presentational only — reach the API layer through hooks, never directly.
+  // backend http/: the edge — no direct Prisma; go through a service → repository.
   {
-    files: ['frontend/src/components/**/*.{ts,tsx}'],
+    files: ['backend/src/http/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [{ name: '@prisma/client', message: 'HTTP layer: no Prisma. Call a service.' }],
+          patterns: [
+            {
+              group: ['**/repositories/prisma/**'],
+              message: 'HTTP layer: no Prisma impl. Call a service.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // frontend components/ and features/: reach the API layer through hooks, never directly.
+  {
+    files: ['frontend/src/components/**/*.{ts,tsx}', 'frontend/src/features/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           patterns: [
             {
-              group: ['**/api/**', '../api/*', '../../api/*'],
-              message: 'Components are presentational: call hooks, not the api/ layer.',
+              group: ['**/api/**', '../api/*', '../../api/*', '../../../api/*'],
+              message: 'Components and views are presentational: call hooks, not the api/ layer.',
             },
           ],
         },

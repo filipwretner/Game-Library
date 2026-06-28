@@ -6,6 +6,9 @@ import { useMoveEntry } from '../../hooks/mutations/useMoveEntry.ts';
 import { useDeleteEntry } from '../../hooks/mutations/useDeleteEntry.ts';
 import { AddGameModal } from '../add-game/AddGameModal.tsx';
 import { GameCard } from '../../components/GameCard.tsx';
+import { Button } from '../../components/Button.tsx';
+import { Loading } from '../../components/Loading.tsx';
+import { ErrorBanner, firstErrorMessage } from '../../components/ErrorBanner.tsx';
 
 /**
  * Backlog view (spec §8.5): owned-but-unplayed games. Compose add + cards; the
@@ -27,24 +30,23 @@ export function BacklogView(): JSX.Element {
     moveEntry.mutate({ id, status: 'WISHLIST' });
   };
 
+  const actionError = firstErrorMessage([addEntry, moveEntry, deleteEntry]);
+
   return (
     <section className="backlog-view">
       <h2>Backlog</h2>
       <AddGameModal onSelect={handleAdd} />
+      <ErrorBanner message={actionError} />
 
-      {isPending && <p>Loading…</p>}
-      {isError && <p role="alert">Could not load your Backlog.</p>}
+      {isPending && <Loading />}
+      <ErrorBanner message={isError ? 'Could not load your Backlog.' : null} />
       {entries && entries.length === 0 && <p>Backlog is empty — search above to add a game.</p>}
       {entries && entries.length > 0 && (
         <ul className="card-list">
           {entries.map((entry) => (
             <GameCard key={entry.id} entry={entry} onDelete={deleteEntry.mutate}>
-              <button type="button" onClick={() => markCompleted(entry.id)}>
-                Mark completed
-              </button>
-              <button type="button" onClick={() => moveToWishlist(entry.id)}>
-                To Wishlist
-              </button>
+              <Button onClick={() => markCompleted(entry.id)}>Mark completed</Button>
+              <Button onClick={() => moveToWishlist(entry.id)}>To Wishlist</Button>
             </GameCard>
           ))}
         </ul>

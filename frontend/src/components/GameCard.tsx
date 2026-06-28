@@ -1,6 +1,7 @@
 import type { JSX, ReactNode } from 'react';
 import type { EntryWithGame } from '../types/index.ts';
 import { PlatformBadge } from './PlatformBadge.tsx';
+import { Button } from './Button.tsx';
 
 interface GameCardProps {
   entry: EntryWithGame;
@@ -25,9 +26,9 @@ export function GameCard({ entry, onDelete, children }: Readonly<GameCardProps>)
       <span className="title">{game.title}</span>
       <PlatformBadge platforms={game.platforms} />
       <div className="card-actions">{children}</div>
-      <button type="button" aria-label={`Remove ${game.title}`} onClick={() => onDelete(entry.id)}>
+      <Button aria-label={`Remove ${game.title}`} onClick={() => onDelete(entry.id)}>
         Remove
-      </button>
+      </Button>
     </li>
   );
 }

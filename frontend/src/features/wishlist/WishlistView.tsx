@@ -9,6 +9,8 @@ import { useFetchPrice } from '../../hooks/mutations/useFetchPrice.ts';
 import { useWishlistTotal } from '../../hooks/logic/useWishlistTotal.ts';
 import { AddGameModal } from '../add-game/AddGameModal.tsx';
 import { WishlistCard } from './WishlistCard.tsx';
+import { Loading } from '../../components/Loading.tsx';
+import { ErrorBanner, firstErrorMessage } from '../../components/ErrorBanner.tsx';
 
 const CURRENCY = 'USD';
 const MONEY_DECIMALS = 2;
@@ -37,6 +39,13 @@ export function WishlistView(): JSX.Element {
   };
 
   const hasEntries = entries !== undefined && entries.length > 0;
+  const actionError = firstErrorMessage([
+    addEntry,
+    moveEntry,
+    updateEntry,
+    deleteEntry,
+    fetchPrice,
+  ]);
 
   return (
     <section className="wishlist-view">
@@ -47,9 +56,10 @@ export function WishlistView(): JSX.Element {
         </p>
       )}
       <AddGameModal onSelect={handleAdd} />
+      <ErrorBanner message={actionError} />
 
-      {isPending && <p>Loading…</p>}
-      {isError && <p role="alert">Could not load your Wishlist.</p>}
+      {isPending && <Loading />}
+      <ErrorBanner message={isError ? 'Could not load your Wishlist.' : null} />
       {entries && entries.length === 0 && <p>Wishlist is empty — search above to add a game.</p>}
       {hasEntries && (
         <ul className="card-list">

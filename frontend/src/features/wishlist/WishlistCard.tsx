@@ -5,6 +5,7 @@ import { GameCard } from '../../components/GameCard.tsx';
 import { PriceEditor } from '../../components/PriceEditor.tsx';
 import { PriceTag } from '../../components/PriceTag.tsx';
 import { SaleBadge } from '../../components/SaleBadge.tsx';
+import { Button } from '../../components/Button.tsx';
 
 interface WishlistCardProps {
   entry: EntryWithGame;
@@ -39,9 +40,9 @@ export function WishlistCard({
       />
       <SaleBadge discountPct={entry.discountPct} />
       {isPc ? (
-        <button type="button" disabled={isFetching} onClick={() => onFetchPrice(entry.id)}>
+        <Button disabled={isFetching} onClick={() => onFetchPrice(entry.id)}>
           Fetch price
-        </button>
+        </Button>
       ) : (
         <PriceEditor
           price={entry.price}
@@ -49,9 +50,7 @@ export function WishlistCard({
           onSave={(price) => onSavePrice(entry.id, price)}
         />
       )}
-      <button type="button" onClick={() => onMoveToBacklog(entry.id)}>
-        To Backlog
-      </button>
+      <Button onClick={() => onMoveToBacklog(entry.id)}>To Backlog</Button>
     </GameCard>
   );
 }

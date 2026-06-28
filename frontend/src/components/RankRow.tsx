@@ -2,6 +2,7 @@ import type { CSSProperties, JSX } from 'react';
 import type { useSortable } from '@dnd-kit/sortable';
 import type { EntryWithGame } from '../types/index.ts';
 import { PlatformBadge } from './PlatformBadge.tsx';
+import { Button } from './Button.tsx';
 
 /** Drag bindings supplied by the sortable list. Optional so the row renders standalone. */
 export type SortableBindings = Pick<
@@ -25,15 +26,14 @@ export function RankRow({ entry, onDelete, sortable }: Readonly<RankRowProps>): 
   return (
     <li ref={sortable?.setNodeRef} style={sortable?.style} className="rank-row">
       {sortable && (
-        <button
-          type="button"
+        <Button
           className="drag-handle"
           aria-label={`Reorder ${game.title}`}
           {...sortable.attributes}
           {...sortable.listeners}
         >
           ⠿
-        </button>
+        </Button>
       )}
       <span className="rank">{entry.rank}</span>
       {game.coverUrl ? (
@@ -43,9 +43,9 @@ export function RankRow({ entry, onDelete, sortable }: Readonly<RankRowProps>): 
       )}
       <span className="title">{game.title}</span>
       <PlatformBadge platforms={game.platforms} />
-      <button type="button" aria-label={`Remove ${game.title}`} onClick={() => onDelete(entry.id)}>
+      <Button aria-label={`Remove ${game.title}`} onClick={() => onDelete(entry.id)}>
         Remove
-      </button>
+      </Button>
     </li>
   );
 }

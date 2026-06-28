@@ -75,6 +75,11 @@ Component → Hook (query/mutation/logic) → api/ wrapper → /api/*   (cached 
 - **No `fetch`/`axios` in components or views** — only via `api/`, reached through hooks.
 - **Shared rules come from `shared/`** (e.g. `preferredPlatform` inside `PlatformBadge`),
   never re-implemented in a component.
+- **Single source of truth for UI.** Common presentational primitives live once in
+  `components/` and are reused by every view — `Button` (bakes in `type="button"`), `Loading`,
+  `ErrorBanner` (all alerts go through it), `GameCard`, `PlatformBadge`. Don't hand-write a raw
+  `<button>` or a `<p>Loading…</p>` / `<p role="alert">` in a view; use the primitive. Repeated
+  markup is a duplication defect — extract it into `components/`.
 - Keep components small, one concern each. List rows stay presentational; interaction logic
   (e.g. `@dnd-kit` reordering) lives in the list container + a mutation hook.
 - Hook keys: TanStack Query keys are arrays, hierarchical and stable
@@ -118,7 +123,7 @@ token set (adjust centrally, not per-component):
   --accent-hover:  #6B4CF0;
 
   /* platform badges */
-  --pc:            #4CA1FF;  /* PC */
+  --pc:            #246ec2;  /* PC */
   --ps5:           #0070D1;  /* PlayStation blue */
 
   /* status */

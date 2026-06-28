@@ -15,7 +15,6 @@ services:
       PORT: 3001
       # Relative to backend/prisma → /app/backend/data/app.db (the mounted volume).
       DATABASE_URL: file:../data/app.db
-      PRICE_CURRENCY: ${PRICE_CURRENCY:-USD}
       IGDB_CLIENT_ID: ${IGDB_CLIENT_ID:-}
       IGDB_CLIENT_SECRET: ${IGDB_CLIENT_SECRET:-}
     volumes:

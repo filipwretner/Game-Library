@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import { Button } from './Button.tsx';
 
 export type TabKey = 'PLAYED' | 'BACKLOG' | 'WISHLIST';
 
@@ -18,15 +19,9 @@ export function Tabs({ active, onChange }: Readonly<TabsProps>): JSX.Element {
   return (
     <nav className="tabs" role="tablist">
       {TAB_LABELS.map(({ key, label }) => (
-        <button
-          key={key}
-          type="button"
-          role="tab"
-          aria-selected={key === active}
-          onClick={() => onChange(key)}
-        >
+        <Button key={key} role="tab" aria-selected={key === active} onClick={() => onChange(key)}>
           {label}
-        </button>
+        </Button>
       ))}
     </nav>
   );

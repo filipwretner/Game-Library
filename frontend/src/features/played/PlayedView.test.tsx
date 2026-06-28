@@ -91,4 +91,16 @@ describe('PlayedView', () => {
       expect(entriesMock.create).toHaveBeenCalledWith({ igdbId: 100, status: 'PLAYED' }),
     );
   });
+
+  it('surfaces a failed add in an error banner', async () => {
+    const user = userEvent.setup();
+    gamesMock.search.mockResolvedValue([searchHit]);
+    entriesMock.create.mockRejectedValue(new Error('Game is already on a list'));
+    renderView();
+
+    await user.type(screen.getByLabelText('Search for a game'), 'hades');
+    await user.click(await screen.findByRole('button', { name: /Hades/ }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Game is already on a list');
+  });
 });

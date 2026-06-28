@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import type { GameSearchResult } from '@game-tracker/shared';
 import { PlatformBadge } from './PlatformBadge.tsx';
+import { Button } from './Button.tsx';
 
 interface SearchResultGridProps {
   results: GameSearchResult[];
@@ -19,7 +20,7 @@ export function SearchResultGrid({
     <ul className="search-result-grid">
       {results.map((game) => (
         <li key={game.igdbId}>
-          <button type="button" onClick={() => onSelect(game)}>
+          <Button onClick={() => onSelect(game)}>
             {game.coverUrl ? (
               <img src={game.coverUrl} alt={`${game.title} cover`} width={90} />
             ) : (
@@ -27,7 +28,7 @@ export function SearchResultGrid({
             )}
             <span className="title">{game.title}</span>
             <PlatformBadge platforms={game.platforms} />
-          </button>
+          </Button>
         </li>
       ))}
     </ul>

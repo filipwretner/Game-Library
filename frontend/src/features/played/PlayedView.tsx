@@ -6,6 +6,8 @@ import { useDeleteEntry } from '../../hooks/mutations/useDeleteEntry.ts';
 import { useReorderEntries } from '../../hooks/mutations/useReorderEntries.ts';
 import { AddGameModal } from '../add-game/AddGameModal.tsx';
 import { RankList } from '../../components/RankList.tsx';
+import { Loading } from '../../components/Loading.tsx';
+import { ErrorBanner, firstErrorMessage } from '../../components/ErrorBanner.tsx';
 
 /**
  * Played list view (spec §8.5). Composition: search-to-add + the ranked list.
@@ -21,13 +23,16 @@ export function PlayedView(): JSX.Element {
     addEntry.mutate({ igdbId: game.igdbId, status: 'PLAYED' });
   };
 
+  const actionError = firstErrorMessage([addEntry, deleteEntry, reorderEntries]);
+
   return (
     <section className="played-view">
       <h2>Played</h2>
       <AddGameModal onSelect={handleAdd} />
+      <ErrorBanner message={actionError} />
 
-      {isPending && <p>Loading…</p>}
-      {isError && <p role="alert">Could not load your Played list.</p>}
+      {isPending && <Loading />}
+      <ErrorBanner message={isError ? 'Could not load your Played list.' : null} />
       {entries && entries.length === 0 && <p>No games yet — search above to add one.</p>}
       {entries && entries.length > 0 && (
         <RankList

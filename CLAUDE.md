@@ -100,8 +100,15 @@ The base config (`tsconfig.base.json`) is `strict: true` plus `noUncheckedIndexe
 - **No magic values.** Name constants (e.g. `IGDB_PC = 6`, HTTP-adjacent numbers). The
   exception list in ESLint covers well-known HTTP status codes only.
 - **Self-documenting names.** Comments explain *why*, not *what*. Delete commented-out code.
-- **No duplicated logic.** Shared rules live once (in `shared/` or a layer's domain) and are
-  imported everywhere.
+- **Single source of truth (no duplication).** Every rule, type, constant, and piece of UI is
+  defined in exactly one place and imported everywhere it's needed — never copy-pasted:
+  - Cross-stack rules/types → `shared/`. Backend business rules → `domain/`.
+  - Repeated UI (buttons, loading/error states, badges, cards) → one presentational component
+    in `frontend/src/components/`, reused by every view. If you write the same JSX/markup a
+    second time, extract it.
+  - Repeated literals → a single named constant.
+  If you catch yourself duplicating, stop and extract — duplication is treated as a defect in
+  review.
 - **Typed errors, centralised handling.** No swallowed errors, no scattered `try/catch` noise
   (see `backend/CLAUDE.md` for the backend error pattern).
 

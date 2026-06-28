@@ -88,8 +88,12 @@ can't (logic placed in the wrong layer even when imports are legal).
 - **Explicit return types** on exported functions; types/contracts from `shared/`.
 - **Small functions, one concern.** Flag high cognitive complexity / deep nesting / long
   functions even if under the lint cap if a clean extraction exists.
-- **No magic values** — named constants (HTTP codes excepted). **No duplicated logic** — shared
-  rule imported, not copy-pasted.
+- **No magic values** — named constants (HTTP codes excepted).
+- **Single source of truth (treat duplication as a defect).** Flag any rule/type/constant
+  defined in more than one place, and any repeated UI that should be a shared presentational
+  component (e.g. duplicated loading/error markup, copy-pasted button JSX, repeated cards). The
+  fix is always "extract and import once" — cross-stack → `shared/`, business rules → `domain/`,
+  reusable UI → `frontend/src/components/`.
 - **Self-documenting names**; comments explain *why*. No commented-out code, no dead code.
 - Consistent naming (`*.service.ts`, `*.repo.ts`, `*.controller.ts`, `useXxx`, PascalCase
   components).

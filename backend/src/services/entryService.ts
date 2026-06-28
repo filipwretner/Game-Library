@@ -1,5 +1,5 @@
 import { preferredPlatform, wishlistTotal } from '@game-tracker/shared';
-import type { EntryStatus, EntryWithGame, Game } from '@game-tracker/shared';
+import type { EntryStatus, EntryWithGame, Game, Platform } from '@game-tracker/shared';
 import type { EntriesRepo, GamesRepo, UpdateEntryInput } from '../repositories/ports.js';
 import type { MetadataProvider, PriceProvider } from '../integrations/ports.js';
 import { ConflictError, NotFoundError, ValidationError } from '../domain/errors.js';
@@ -17,7 +17,7 @@ const PRICE_CURRENCY = 'USD';
 export interface AddEntryInput {
   igdbId: number;
   status: EntryStatus;
-  ownedPlatform?: 'PC' | 'PS5' | null;
+  ownedPlatform?: Platform | null;
   dateCompleted?: string | null;
   notes?: string | null;
 }
@@ -148,7 +148,7 @@ export class EntryService {
     return this.games.upsertByIgdbId(metadata);
   }
 
-  private resolveOwnedPlatform(input: AddEntryInput, game: Game): 'PC' | 'PS5' | null {
+  private resolveOwnedPlatform(input: AddEntryInput, game: Game): Platform | null {
     if (input.status === 'WISHLIST') return null;
     return input.ownedPlatform ?? preferredPlatform(game.platforms);
   }
