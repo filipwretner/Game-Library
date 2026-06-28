@@ -57,6 +57,20 @@ Run from the repo root:
 A pre-commit hook (Husky + lint-staged) runs Prettier, ESLint, typecheck and tests on
 commit. **Do not bypass it** (`--no-verify`) — fix the cause instead.
 
+## CI/CD
+
+`.github/workflows/ci.yml` runs on push/PR to `main`:
+
+1. **quality** — install, Prisma generate, `format:check` → `lint` → `typecheck` → `test`
+   → `pnpm -r build`. Mirror of the local gates; keep them green before pushing.
+2. **docker** — `docker compose build`, start the stack with dummy IGDB creds, smoke-test
+   `/api/health` directly and through the frontend proxy, then tear down.
+3. **publish** — on push to `main` only, builds and pushes both images to GHCR
+   (`ghcr.io/<owner>/game-tracker-{backend,frontend}`).
+
+The CI commands must match the local scripts — if you change a script name or add a
+workspace, update the workflow too.
+
 ---
 
 ## TypeScript rules (whole repo)
