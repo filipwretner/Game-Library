@@ -2,8 +2,9 @@ import { preferredPlatform } from '@game-tracker/shared';
 import type { EntryStatus, EntryWithGame, Game } from '@game-tracker/shared';
 import type { EntriesRepo, GamesRepo, UpdateEntryInput } from '../repositories/ports.js';
 import type { MetadataProvider } from '../integrations/ports.js';
-import { ConflictError, NotFoundError } from '../domain/errors.js';
+import { ConflictError, NotFoundError, ValidationError } from '../domain/errors.js';
 import { resetFieldsForStatus } from '../domain/entryRules.js';
+import { recomputeRanks } from '../domain/ranking.js';
 
 /** Body for adding a game to a list (spec §7.5 POST /api/entries). */
 export interface AddEntryInput {
@@ -62,6 +63,25 @@ export class EntryService {
     await this.entries.delete(id);
   }
 
+  /**
+   * Commit a drag-and-drop reorder (spec §7.5 PUT /api/entries/rank). The given
+   * ids must be exactly the current PLAYED set so a stale/partial list can't
+   * corrupt the ranking. Returns the freshly ordered list.
+   */
+  async reorderPlayed(orderedEntryIds: number[]): Promise<EntryWithGame[]> {
+    const played = await this.entries.findByStatus('PLAYED');
+    if (
+      !isSamePermutation(
+        orderedEntryIds,
+        played.map((e) => e.id),
+      )
+    ) {
+      throw new ValidationError('orderedEntryIds must match the current Played entries');
+    }
+    await this.entries.setRanks(recomputeRanks(orderedEntryIds));
+    return this.entries.findByStatus('PLAYED');
+  }
+
   /** When status changes, clear the old list's fields and assign a PLAYED rank. */
   private async applyStatusTransition(
     current: EntryWithGame,
@@ -106,4 +126,11 @@ export class EntryService {
     }
     return entry;
   }
+}
+
+/** True when both arrays contain the same ids (any order, no duplicates introduced). */
+function isSamePermutation(a: readonly number[], b: readonly number[]): boolean {
+  if (a.length !== b.length) return false;
+  const set = new Set(b);
+  return a.every((id) => set.has(id));
 }

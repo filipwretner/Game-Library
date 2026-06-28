@@ -1,5 +1,5 @@
 import type { EntryStatus, EntryWithGame, Platform } from '../types/index.ts';
-import { apiDelete, apiGet, apiPatch, apiPost } from './client.ts';
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from './client.ts';
 
 /** Body for adding a game to a list (mirrors POST /api/entries). */
 export interface AddEntryBody {
@@ -32,4 +32,6 @@ export const entriesApi = {
   update: (id: number, patch: UpdateEntryBody): Promise<EntryWithGame> =>
     apiPatch<EntryWithGame>(`/entries/${id}`, patch),
   remove: (id: number): Promise<void> => apiDelete(`/entries/${id}`),
+  reorder: (orderedEntryIds: number[]): Promise<EntryWithGame[]> =>
+    apiPut<EntryWithGame[]>('/entries/rank', { orderedEntryIds }),
 };

@@ -63,6 +63,26 @@ describe('entries endpoints', () => {
     expect(list.body).toHaveLength(0);
   });
 
+  it('reorders the Played list via PUT /entries/rank', async () => {
+    const game2: GameMetadata = { ...game, igdbId: 2, title: 'Celeste' };
+    app = createApp(buildTestHarness([game, game2]).container);
+
+    const first = await request(app).post('/api/entries').send({ igdbId: 1, status: 'PLAYED' });
+    const second = await request(app).post('/api/entries').send({ igdbId: 2, status: 'PLAYED' });
+    const a = first.body.id as number;
+    const b = second.body.id as number;
+
+    const res = await request(app)
+      .put('/api/entries/rank')
+      .send({ orderedEntryIds: [b, a] });
+
+    expect(res.status).toBe(200);
+    expect(res.body.map((e: { id: number; rank: number }) => [e.id, e.rank])).toEqual([
+      [b, 1],
+      [a, 2],
+    ]);
+  });
+
   it('rejects a bad status query and a missing body with 400', async () => {
     expect((await request(app).get('/api/entries?status=NOPE')).status).toBe(400);
     expect((await request(app).post('/api/entries').send({ igdbId: 1 })).status).toBe(400);

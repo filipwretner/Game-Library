@@ -38,5 +38,9 @@ export const updateEntrySchema = z
   })
   .partial();
 
+export const reorderSchema = z.object({
+  orderedEntryIds: z.array(z.number().int().positive()).min(1),
+});
+
 export type CreateEntryBody = z.infer<typeof createEntrySchema>;
 export type UpdateEntryBody = z.infer<typeof updateEntrySchema>;

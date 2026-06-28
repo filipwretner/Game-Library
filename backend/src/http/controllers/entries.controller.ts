@@ -6,6 +6,7 @@ import {
   createEntrySchema,
   entryIdParamSchema,
   listEntriesQuerySchema,
+  reorderSchema,
   updateEntrySchema,
 } from '../validators/entries.validators.js';
 
@@ -17,6 +18,7 @@ export interface EntriesController {
   create: AsyncRequestHandler;
   update: AsyncRequestHandler;
   remove: AsyncRequestHandler;
+  reorder: AsyncRequestHandler;
 }
 
 /** Thin controllers (spec §7.1): validate → call one service method → respond. */
@@ -39,6 +41,10 @@ export function makeEntriesController(entryService: EntryService): EntriesContro
       const { id } = parse(entryIdParamSchema, req.params);
       await entryService.deleteEntry(id);
       res.status(HTTP_NO_CONTENT).end();
+    },
+    reorder: async (req, res) => {
+      const { orderedEntryIds } = parse(reorderSchema, req.body);
+      res.json(await entryService.reorderPlayed(orderedEntryIds));
     },
   };
 }

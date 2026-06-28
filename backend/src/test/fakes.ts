@@ -98,6 +98,14 @@ export class InMemoryEntriesRepo implements EntriesRepo {
     return Promise.resolve();
   }
 
+  setRanks(rankings: ReadonlyArray<{ id: number; rank: number }>): Promise<void> {
+    for (const { id, rank } of rankings) {
+      const entry = this.rows.find((r) => r.id === id);
+      if (entry) entry.rank = rank;
+    }
+    return Promise.resolve();
+  }
+
   private join(entry: Entry): EntryWithGame {
     const game = this.games.byId.get(entry.gameId);
     if (!game) throw new Error(`game ${entry.gameId} missing for entry ${entry.id}`);

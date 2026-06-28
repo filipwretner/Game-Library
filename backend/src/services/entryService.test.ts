@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { GameMetadata } from '@game-tracker/shared';
 import { buildTestHarness, type TestHarness } from '../test/fakes.js';
-import { ConflictError, NotFoundError } from '../domain/errors.js';
+import { ConflictError, NotFoundError, ValidationError } from '../domain/errors.js';
 
 const pcGame: GameMetadata = {
   igdbId: 1,
@@ -70,6 +70,26 @@ describe('EntryService', () => {
     expect(moved.rank).toBe(1);
     expect(moved.price).toBeNull();
     expect(moved.priceStore).toBeNull();
+  });
+
+  it('reorders the Played list into a gap-free ranking', async () => {
+    const service = harness.container.entryService;
+    const a = await service.addEntry({ igdbId: 1, status: 'PLAYED' });
+    const b = await service.addEntry({ igdbId: 2, status: 'PLAYED' });
+
+    const reordered = await service.reorderPlayed([b.id, a.id]);
+
+    expect(reordered.map((e) => [e.id, e.rank])).toEqual([
+      [b.id, 1],
+      [a.id, 2],
+    ]);
+  });
+
+  it('rejects a reorder whose ids are not the current Played set', async () => {
+    const service = harness.container.entryService;
+    const a = await service.addEntry({ igdbId: 1, status: 'PLAYED' });
+
+    await expect(service.reorderPlayed([a.id, 999])).rejects.toBeInstanceOf(ValidationError);
   });
 
   it('deletes an entry and rejects deleting a missing one', async () => {

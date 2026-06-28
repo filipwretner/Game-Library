@@ -9,6 +9,8 @@ export function entriesRoutes(entryService: EntryService): Router {
 
   router.get('/entries', asyncHandler(controller.list));
   router.post('/entries', asyncHandler(controller.create));
+  // Static path before ':id' so "rank" is never read as an id.
+  router.put('/entries/rank', asyncHandler(controller.reorder));
   router.patch('/entries/:id', asyncHandler(controller.update));
   router.delete('/entries/:id', asyncHandler(controller.remove));
 

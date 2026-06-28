@@ -63,6 +63,14 @@ export class PrismaEntriesRepo implements EntriesRepo {
   async delete(id: number): Promise<void> {
     await this.prisma.entry.delete({ where: { id } });
   }
+
+  async setRanks(rankings: ReadonlyArray<{ id: number; rank: number }>): Promise<void> {
+    await this.prisma.$transaction(
+      rankings.map((r) =>
+        this.prisma.entry.update({ where: { id: r.id }, data: { rank: r.rank } }),
+      ),
+    );
+  }
 }
 
 /**

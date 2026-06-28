@@ -35,4 +35,6 @@ export interface EntriesRepo {
   create(input: CreateEntryInput): Promise<Entry>;
   update(id: number, patch: UpdateEntryInput): Promise<Entry>;
   delete(id: number): Promise<void>;
+  /** Apply a batch of rank assignments atomically (drag-and-drop reorder). */
+  setRanks(rankings: ReadonlyArray<{ id: number; rank: number }>): Promise<void>;
 }
