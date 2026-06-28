@@ -141,6 +141,8 @@ export default tseslint.config(
       // supertest/response bodies are typed `any`; assertions on them are fine in tests.
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
+      // Passing a mock method to expect(...) is idiomatic and safe in tests.
+      '@typescript-eslint/unbound-method': 'off',
     },
   },
 );

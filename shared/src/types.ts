@@ -44,6 +44,14 @@ export interface Entry {
   createdAt: string;
 }
 
+/** A game candidate returned by metadata search (IGDB), shown when adding. */
+export interface GameSearchResult {
+  igdbId: number;
+  title: string;
+  coverUrl: string | null;
+  platforms: number[];
+}
+
 /** A normalised price result from a PriceProvider (CheapShark today). */
 export interface PriceQuote {
   price: number;

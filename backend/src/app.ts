@@ -1,22 +1,21 @@
 import express, { type Express } from 'express';
+import type { AppContainer } from './container.js';
 import { healthRoutes } from './http/routes/health.routes.js';
+import { gamesRoutes } from './http/routes/games.routes.js';
 import { errorHandler, notFoundHandler } from './http/middleware/errorHandler.js';
 
 /**
- * Composition root (spec §7.3): constructs concrete repositories/providers,
- * injects them into services, injects services into controllers, and mounts the
- * routes. Manual DI — no framework needed at this scale. Returns the app without
- * listening so tests (supertest) can drive it in-process.
- *
- * Only the health slice is wired in the skeleton; feature wiring is added as
- * milestones land.
+ * Builds the Express app from a pre-wired container (spec §7.3). Manual DI: the
+ * container is constructed at the composition root (buildContainer) or by tests
+ * with fakes. Returns the app without listening so supertest can drive it.
  */
-export function createApp(): Express {
+export function createApp(container: AppContainer): Express {
   const app = express();
   app.use(express.json());
 
   const api = express.Router();
   api.use(healthRoutes());
+  api.use(gamesRoutes(container.searchService));
   app.use('/api', api);
 
   app.use(notFoundHandler);

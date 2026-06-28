@@ -33,3 +33,11 @@ export class ConflictError extends DomainError {
     super(message, 'CONFLICT');
   }
 }
+
+/** An upstream/external API (IGDB, CheapShark) failed or misbehaved. */
+export class BadGatewayError extends DomainError {
+  readonly status = 502;
+  constructor(message = 'Upstream service error') {
+    super(message, 'BAD_GATEWAY');
+  }
+}
