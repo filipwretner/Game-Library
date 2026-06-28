@@ -70,3 +70,7 @@ architecture (no new layers). Items are independent — pick any order.
 - **IsThereAnyDeal (ITAD)** — only needed for price-history / "notify at target price". Swapping
   it in is a single new `PriceProvider` implementation behind the existing port (spec §2.2).
 - **Multi-currency** — currency is pinned to USD by decision; revisit only if buying in SEK etc.
+
+
+## Another next step
+The ability to add custom lists. Essentially a view on the page that has some sort of "Create List" button that lets you add a title. Then in that list we essentially have the same functionality as the rest of the views: A search bar for games, displaying them in a list and letting us rank them. Could be cool to have in your library something like "Top 10 Games of 20xx".
