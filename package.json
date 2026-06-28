@@ -8,12 +8,14 @@
     "node": ">=20"
   },
   "scripts": {
+    "dev": "pnpm -r --parallel run dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "db:setup": "pnpm --filter @game-tracker/backend prisma:generate && pnpm --filter @game-tracker/backend prisma:migrate",
     "prepare": "husky"
   },
   "devDependencies": {
