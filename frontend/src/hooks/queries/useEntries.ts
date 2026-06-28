@@ -13,3 +13,11 @@ export function useEntries(status: EntryStatus): UseQueryResult<EntryWithGame[]>
 export function usePlayedEntries(): UseQueryResult<EntryWithGame[]> {
   return useEntries('PLAYED');
 }
+
+export function useBacklog(): UseQueryResult<EntryWithGame[]> {
+  return useEntries('BACKLOG');
+}
+
+export function useWishlist(): UseQueryResult<EntryWithGame[]> {
+  return useEntries('WISHLIST');
+}
