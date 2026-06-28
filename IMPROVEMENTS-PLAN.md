@@ -88,8 +88,9 @@ row as Played, so it's the moment to unify the card into one two-row component.
 **Problem:** long titles push the Remove button onto a new line; layout jumps.
 
 **Target layout (all lists):**
-- **Top row:** cover, title + release year, platform badge, (completion/release date — item to
-  detail later). Title may wrap; nothing else moves.
+- **Top row:** cover, title + **release year** (item 2), platform badge. Title may wrap; the
+  year sits inline in the title row, making it longer — which is exactly why the buttons move
+  to their own row.
 - **Bottom row, right-aligned (`justify-end`):** price (wishlist) + action buttons + Remove.
 
 Replace the single-flex `GameCard`/`RankRow` with one `EntryCard` that renders two rows and
@@ -122,11 +123,6 @@ Data migration: existing Backlog/Wishlist rows have `rank = null`; backfill on f
 lazily assign on first reorder (decide during impl; a one-off `setRanks` per list is simplest).
 
 ---
-
-## Item to detail later (from the user)
-
-- **Date on the top row.** The user will specify exactly which date and where (completion date
-  for Played, release date elsewhere?). Top-row layout above leaves a slot for it.
 
 ## Forward-looking (already noted in ROADMAP.md)
 
