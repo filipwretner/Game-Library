@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app.js';
-import { SearchService } from '../services/searchService.js';
-import type { MetadataProvider } from '../integrations/ports.js';
+import { buildTestHarness } from '../test/fakes.js';
 
 function testApp() {
-  const metadata: MetadataProvider = { search: () => Promise.resolve([]) };
-  return createApp({ searchService: new SearchService(metadata) });
+  return createApp(buildTestHarness().container);
 }
 
 describe('GET /api/health', () => {

@@ -2,6 +2,7 @@ import express, { type Express } from 'express';
 import type { AppContainer } from './container.js';
 import { healthRoutes } from './http/routes/health.routes.js';
 import { gamesRoutes } from './http/routes/games.routes.js';
+import { entriesRoutes } from './http/routes/entries.routes.js';
 import { errorHandler, notFoundHandler } from './http/middleware/errorHandler.js';
 
 /**
@@ -16,6 +17,7 @@ export function createApp(container: AppContainer): Express {
   const api = express.Router();
   api.use(healthRoutes());
   api.use(gamesRoutes(container.searchService));
+  api.use(entriesRoutes(container.entryService));
   app.use('/api', api);
 
   app.use(notFoundHandler);

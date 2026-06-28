@@ -52,6 +52,22 @@ export interface GameSearchResult {
   platforms: number[];
 }
 
+/** Full metadata for one game from IGDB — the upsert input for the `games` table. */
+export interface GameMetadata {
+  igdbId: number;
+  title: string;
+  coverUrl: string | null;
+  summary: string | null;
+  releaseDate: string | null;
+  platforms: number[];
+  igdbRating: number | null;
+}
+
+/** An entry joined with its cached game metadata — the list/read shape. */
+export interface EntryWithGame extends Entry {
+  game: Game;
+}
+
 /** A normalised price result from a PriceProvider (CheapShark today). */
 export interface PriceQuote {
   price: number;

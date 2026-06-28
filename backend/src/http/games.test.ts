@@ -2,10 +2,17 @@ import { describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app.js';
 import { SearchService } from '../services/searchService.js';
+import { EntryService } from '../services/entryService.js';
+import { InMemoryEntriesRepo, InMemoryGamesRepo } from '../test/fakes.js';
 import type { MetadataProvider, MetadataSearchResult } from '../integrations/ports.js';
 
 function appWith(metadata: MetadataProvider) {
-  return createApp({ searchService: new SearchService(metadata) });
+  const games = new InMemoryGamesRepo();
+  const entries = new InMemoryEntriesRepo(games);
+  return createApp({
+    searchService: new SearchService(metadata),
+    entryService: new EntryService(entries, games, metadata),
+  });
 }
 
 describe('GET /api/games/search', () => {
@@ -16,7 +23,10 @@ describe('GET /api/games/search', () => {
       coverUrl: null,
       platforms: [6],
     };
-    const metadata: MetadataProvider = { search: vi.fn().mockResolvedValue([result]) };
+    const metadata: MetadataProvider = {
+      search: vi.fn().mockResolvedValue([result]),
+      getByIgdbId: vi.fn(),
+    };
 
     const res = await request(appWith(metadata)).get('/api/games/search?q=hades');
 
@@ -26,7 +36,7 @@ describe('GET /api/games/search', () => {
   });
 
   it('rejects a missing query with 400', async () => {
-    const metadata: MetadataProvider = { search: vi.fn() };
+    const metadata: MetadataProvider = { search: vi.fn(), getByIgdbId: vi.fn() };
     const res = await request(appWith(metadata)).get('/api/games/search');
 
     expect(res.status).toBe(400);
@@ -39,6 +49,7 @@ describe('GET /api/games/search', () => {
       search: vi
         .fn()
         .mockRejectedValue(new (await import('../domain/errors.js')).BadGatewayError()),
+      getByIgdbId: vi.fn(),
     };
     const res = await request(appWith(metadata)).get('/api/games/search?q=x');
 

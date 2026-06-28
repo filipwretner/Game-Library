@@ -5,6 +5,7 @@
  */
 
 const API_BASE = '/api';
+const HTTP_NO_CONTENT = 204;
 
 export class ApiError extends Error {
   constructor(
@@ -16,10 +17,30 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`);
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
   if (!res.ok) {
-    throw new ApiError(res.status, `GET ${path} failed (${res.status})`);
+    throw new ApiError(res.status, `${method} ${path} failed (${res.status})`);
   }
-  return res.json() as Promise<T>;
+  return (res.status === HTTP_NO_CONTENT ? undefined : await res.json()) as T;
+}
+
+export function apiGet<T>(path: string): Promise<T> {
+  return request<T>('GET', path);
+}
+
+export function apiPost<T>(path: string, body: unknown): Promise<T> {
+  return request<T>('POST', path, body);
+}
+
+export function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  return request<T>('PATCH', path, body);
+}
+
+export function apiDelete(path: string): Promise<void> {
+  return request<void>('DELETE', path);
 }

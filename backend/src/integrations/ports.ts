@@ -1,4 +1,4 @@
-import type { GameSearchResult, PriceQuote } from '@game-tracker/shared';
+import type { GameMetadata, GameSearchResult, PriceQuote } from '@game-tracker/shared';
 
 /**
  * Integration ports (spec §7.1 layer 5, §2.2). External APIs sit behind these
@@ -11,6 +11,8 @@ export type MetadataSearchResult = GameSearchResult;
 
 export interface MetadataProvider {
   search(query: string): Promise<MetadataSearchResult[]>;
+  /** Full metadata for one game by IGDB id, or null if not found. */
+  getByIgdbId(igdbId: number): Promise<GameMetadata | null>;
 }
 
 export interface PriceProvider {

@@ -2,7 +2,11 @@ import type { Env } from './config/env.js';
 import type { MetadataProvider } from './integrations/ports.js';
 import { createIgdbClient } from './integrations/igdb/igdbClient.js';
 import { IgdbMetadataProvider } from './integrations/igdb/igdbMetadataProvider.js';
+import { prisma } from './repositories/prisma/prismaClient.js';
+import { PrismaEntriesRepo } from './repositories/prisma/prismaEntriesRepo.js';
+import { PrismaGamesRepo } from './repositories/prisma/prismaGamesRepo.js';
 import { SearchService } from './services/searchService.js';
+import { EntryService } from './services/entryService.js';
 
 /**
  * Application container (spec §7.3). Holds the wired services the HTTP layer
@@ -12,13 +16,19 @@ import { SearchService } from './services/searchService.js';
  */
 export interface AppContainer {
   searchService: SearchService;
+  entryService: EntryService;
 }
 
 /** Composition root: concrete impls → services. The only place they are wired. */
 export function buildContainer(env: Env): AppContainer {
-  const metadataProvider: MetadataProvider = buildMetadataProvider(env);
-  const searchService = new SearchService(metadataProvider);
-  return { searchService };
+  const metadataProvider = buildMetadataProvider(env);
+  const gamesRepo = new PrismaGamesRepo(prisma);
+  const entriesRepo = new PrismaEntriesRepo(prisma);
+
+  return {
+    searchService: new SearchService(metadataProvider),
+    entryService: new EntryService(entriesRepo, gamesRepo, metadataProvider),
+  };
 }
 
 function buildMetadataProvider(env: Env): MetadataProvider {
