@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import type { Express } from 'express';
-import type { GameMetadata } from '@game-tracker/shared';
+import type { GameMetadata, PriceQuote } from '@game-tracker/shared';
 import { createApp } from '../app.js';
 import { buildTestHarness } from '../test/fakes.js';
 
@@ -81,6 +81,29 @@ describe('entries endpoints', () => {
       [b, 1],
       [a, 2],
     ]);
+  });
+
+  it('fetches a PC wishlist price and exposes the wishlist total', async () => {
+    const quote: PriceQuote = {
+      price: 6.24,
+      normalPrice: 24.99,
+      discountPct: 75,
+      currency: 'USD',
+      store: 'Steam',
+      dealUrl: 'https://www.cheapshark.com/redirect?dealID=xyz',
+    };
+    app = createApp(buildTestHarness([game], quote).container);
+    const created = await request(app).post('/api/entries').send({ igdbId: 1, status: 'WISHLIST' });
+    const id = created.body.id as number;
+
+    const fetched = await request(app).post(`/api/entries/${id}/fetch-price`);
+    expect(fetched.status).toBe(200);
+    expect(fetched.body.price).toBe(6.24);
+    expect(fetched.body.discountPct).toBe(75);
+
+    const total = await request(app).get('/api/wishlist/total');
+    expect(total.status).toBe(200);
+    expect(total.body).toEqual({ total: 6.24, currency: 'USD' });
   });
 
   it('rejects a bad status query and a missing body with 400', async () => {

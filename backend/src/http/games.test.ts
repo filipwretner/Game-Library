@@ -3,7 +3,7 @@ import request from 'supertest';
 import { createApp } from '../app.js';
 import { SearchService } from '../services/searchService.js';
 import { EntryService } from '../services/entryService.js';
-import { InMemoryEntriesRepo, InMemoryGamesRepo } from '../test/fakes.js';
+import { FakePriceProvider, InMemoryEntriesRepo, InMemoryGamesRepo } from '../test/fakes.js';
 import type { MetadataProvider, MetadataSearchResult } from '../integrations/ports.js';
 
 function appWith(metadata: MetadataProvider) {
@@ -11,7 +11,7 @@ function appWith(metadata: MetadataProvider) {
   const entries = new InMemoryEntriesRepo(games);
   return createApp({
     searchService: new SearchService(metadata),
-    entryService: new EntryService(entries, games, metadata),
+    entryService: new EntryService(entries, games, metadata, new FakePriceProvider()),
   });
 }
 

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { GameMetadata } from '@game-tracker/shared';
+import type { GameMetadata, PriceQuote } from '@game-tracker/shared';
 import { buildTestHarness, type TestHarness } from '../test/fakes.js';
 import { ConflictError, NotFoundError, ValidationError } from '../domain/errors.js';
 
@@ -90,6 +90,44 @@ describe('EntryService', () => {
     const a = await service.addEntry({ igdbId: 1, status: 'PLAYED' });
 
     await expect(service.reorderPlayed([a.id, 999])).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('fetches a PC wishlist price and stores the quote', async () => {
+    const quote: PriceQuote = {
+      price: 6.24,
+      normalPrice: 24.99,
+      discountPct: 75,
+      currency: 'USD',
+      store: 'Steam',
+      dealUrl: 'https://www.cheapshark.com/redirect?dealID=xyz',
+    };
+    const priced = buildTestHarness([pcGame], quote).container.entryService;
+    const entry = await priced.addEntry({ igdbId: 1, status: 'WISHLIST' });
+
+    const updated = await priced.fetchPrice(entry.id);
+
+    expect(updated.price).toBe(6.24);
+    expect(updated.normalPrice).toBe(24.99);
+    expect(updated.discountPct).toBe(75);
+    expect(updated.priceStore).toBe('Steam');
+    expect(updated.priceUpdatedAt).not.toBeNull();
+  });
+
+  it('rejects auto price fetch for a PS5 wishlist item', async () => {
+    const service = harness.container.entryService;
+    const entry = await service.addEntry({ igdbId: 2, status: 'WISHLIST' });
+
+    await expect(service.fetchPrice(entry.id)).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('sums the wishlist total in USD', async () => {
+    const priced = buildTestHarness([pcGame, ps5Game]).container.entryService;
+    const a = await priced.addEntry({ igdbId: 1, status: 'WISHLIST' });
+    const b = await priced.addEntry({ igdbId: 2, status: 'WISHLIST' });
+    await priced.updateEntry(a.id, { price: 19.99 });
+    await priced.updateEntry(b.id, { price: 10 });
+
+    expect(await priced.wishlistTotal()).toEqual({ total: 29.99, currency: 'USD' });
   });
 
   it('deletes an entry and rejects deleting a missing one', async () => {

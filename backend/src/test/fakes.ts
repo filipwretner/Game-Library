@@ -1,11 +1,22 @@
-import type { Entry, EntryStatus, EntryWithGame, Game, GameMetadata } from '@game-tracker/shared';
+import type {
+  Entry,
+  EntryStatus,
+  EntryWithGame,
+  Game,
+  GameMetadata,
+  PriceQuote,
+} from '@game-tracker/shared';
 import type {
   CreateEntryInput,
   EntriesRepo,
   GamesRepo,
   UpdateEntryInput,
 } from '../repositories/ports.js';
-import type { MetadataProvider, MetadataSearchResult } from '../integrations/ports.js';
+import type {
+  MetadataProvider,
+  MetadataSearchResult,
+  PriceProvider,
+} from '../integrations/ports.js';
 import type { AppContainer } from '../container.js';
 import { SearchService } from '../services/searchService.js';
 import { EntryService } from '../services/entryService.js';
@@ -128,6 +139,14 @@ export class FakeMetadataProvider implements MetadataProvider {
   }
 }
 
+export class FakePriceProvider implements PriceProvider {
+  constructor(private readonly quote: PriceQuote | null = null) {}
+
+  getBestPrice(): Promise<PriceQuote | null> {
+    return Promise.resolve(this.quote);
+  }
+}
+
 export interface TestHarness {
   container: AppContainer;
   games: InMemoryGamesRepo;
@@ -135,15 +154,19 @@ export interface TestHarness {
 }
 
 /** Build an AppContainer backed by in-memory fakes, seeded with known metadata. */
-export function buildTestHarness(seed: GameMetadata[] = []): TestHarness {
+export function buildTestHarness(
+  seed: GameMetadata[] = [],
+  priceQuote: PriceQuote | null = null,
+): TestHarness {
   const metadata = new Map(seed.map((m) => [m.igdbId, m]));
   const provider = new FakeMetadataProvider(metadata);
+  const prices = new FakePriceProvider(priceQuote);
   const games = new InMemoryGamesRepo();
   const entries = new InMemoryEntriesRepo(games);
 
   const container: AppContainer = {
     searchService: new SearchService(provider),
-    entryService: new EntryService(entries, games, provider),
+    entryService: new EntryService(entries, games, provider, prices),
   };
   return { container, games, entries };
 }

@@ -2,6 +2,8 @@ import type { Env } from './config/env.js';
 import type { MetadataProvider } from './integrations/ports.js';
 import { createIgdbClient } from './integrations/igdb/igdbClient.js';
 import { IgdbMetadataProvider } from './integrations/igdb/igdbMetadataProvider.js';
+import { createCheapsharkClient } from './integrations/cheapshark/cheapsharkClient.js';
+import { CheapsharkPriceProvider } from './integrations/cheapshark/cheapsharkPriceProvider.js';
 import { prisma } from './repositories/prisma/prismaClient.js';
 import { PrismaEntriesRepo } from './repositories/prisma/prismaEntriesRepo.js';
 import { PrismaGamesRepo } from './repositories/prisma/prismaGamesRepo.js';
@@ -22,12 +24,13 @@ export interface AppContainer {
 /** Composition root: concrete impls → services. The only place they are wired. */
 export function buildContainer(env: Env): AppContainer {
   const metadataProvider = buildMetadataProvider(env);
+  const priceProvider = new CheapsharkPriceProvider(createCheapsharkClient());
   const gamesRepo = new PrismaGamesRepo(prisma);
   const entriesRepo = new PrismaEntriesRepo(prisma);
 
   return {
     searchService: new SearchService(metadataProvider),
-    entryService: new EntryService(entriesRepo, gamesRepo, metadataProvider),
+    entryService: new EntryService(entriesRepo, gamesRepo, metadataProvider, priceProvider),
   };
 }
 

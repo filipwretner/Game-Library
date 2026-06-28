@@ -1,8 +1,11 @@
 import { IGDB_PC } from '@game-tracker/shared';
-import type { EntryWithGame } from '../types/index.ts';
+import type { EntryWithGame, Game } from '../types/index.ts';
+
+type EntryOverrides = Partial<Omit<EntryWithGame, 'game'>> & { game?: Partial<Game> };
 
 /** Build an EntryWithGame for tests; override only the fields a test cares about. */
-export function makeEntry(overrides: Partial<EntryWithGame> = {}): EntryWithGame {
+export function makeEntry(overrides: EntryOverrides = {}): EntryWithGame {
+  const { game, ...entry } = overrides;
   return {
     id: 7,
     gameId: 1,
@@ -18,7 +21,7 @@ export function makeEntry(overrides: Partial<EntryWithGame> = {}): EntryWithGame
     dateCompleted: null,
     notes: null,
     createdAt: '2026-01-01T00:00:00.000Z',
-    ...overrides,
+    ...entry,
     game: {
       id: 1,
       igdbId: 100,
@@ -29,7 +32,7 @@ export function makeEntry(overrides: Partial<EntryWithGame> = {}): EntryWithGame
       platforms: [IGDB_PC],
       igdbRating: null,
       cachedAt: '2026-01-01T00:00:00.000Z',
-      ...overrides.game,
+      ...game,
     },
   };
 }

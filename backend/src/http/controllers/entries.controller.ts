@@ -19,6 +19,8 @@ export interface EntriesController {
   update: AsyncRequestHandler;
   remove: AsyncRequestHandler;
   reorder: AsyncRequestHandler;
+  fetchPrice: AsyncRequestHandler;
+  wishlistTotal: AsyncRequestHandler;
 }
 
 /** Thin controllers (spec §7.1): validate → call one service method → respond. */
@@ -45,6 +47,13 @@ export function makeEntriesController(entryService: EntryService): EntriesContro
     reorder: async (req, res) => {
       const { orderedEntryIds } = parse(reorderSchema, req.body);
       res.json(await entryService.reorderPlayed(orderedEntryIds));
+    },
+    fetchPrice: async (req, res) => {
+      const { id } = parse(entryIdParamSchema, req.params);
+      res.json(await entryService.fetchPrice(id));
+    },
+    wishlistTotal: async (_req, res) => {
+      res.json(await entryService.wishlistTotal());
     },
   };
 }
