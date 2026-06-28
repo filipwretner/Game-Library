@@ -1,0 +1,59 @@
+// Prisma schema — SQLite, single-file DB (spec §3, §5).
+// SQLite has no native enums, so status/ownedPlatform are stored as strings and
+// constrained by Zod at the HTTP boundary + the shared domain types.
+// Ordinal-only ranking decision: no `rating` column.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Cached metadata from IGDB. One row per referenced game, never duplicated.
+model Game {
+  id          Int      @id @default(autoincrement())
+  igdbId      Int      @unique
+  title       String
+  coverUrl    String?
+  summary     String?
+  releaseDate DateTime?
+  /// JSON-encoded array of IGDB platform ids — drives preferredPlatform() (§6).
+  platforms   String   @default("[]")
+  igdbRating  Float?
+  cachedAt    DateTime @default(now())
+
+  entry Entry?
+}
+
+/// A game's presence on exactly one list (PLAYED | BACKLOG | WISHLIST).
+model Entry {
+  id     Int    @id @default(autoincrement())
+  gameId Int    @unique
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  /// "PLAYED" | "BACKLOG" | "WISHLIST"
+  status String
+
+  /// Ordering within PLAYED, 1 = best. Null otherwise.
+  rank Int?
+
+  /// "PC" | "PS5" — version owned/played (BACKLOG/PLAYED).
+  ownedPlatform String?
+
+  // Wishlist pricing (§2.2 CheapShark for PC, manual for PS5).
+  price          Float?
+  normalPrice    Float?
+  discountPct    Int?
+  priceCurrency  String?
+  priceStore     String?
+  priceUpdatedAt DateTime?
+
+  dateCompleted DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+
+  @@index([status, rank])
+}

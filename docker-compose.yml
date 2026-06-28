@@ -1,0 +1,37 @@
+# Dev layout (spec §10): two services, one command to start.
+#   docker compose up --build
+# Frontend: http://localhost:5173  (proxies /api → backend)
+# Backend:  http://localhost:3001/api/health
+#
+# Copy .env.example → .env first (IGDB creds optional until Milestone 2).
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      # Relative to backend/prisma → /app/backend/data/app.db (the mounted volume).
+      DATABASE_URL: file:../data/app.db
+      PRICE_CURRENCY: ${PRICE_CURRENCY:-USD}
+      IGDB_CLIENT_ID: ${IGDB_CLIENT_ID:-}
+      IGDB_CLIENT_SECRET: ${IGDB_CLIENT_SECRET:-}
+    volumes:
+      # Persist the SQLite file across restarts. Back up by copying ./data.
+      - ./data:/app/backend/data
+    ports:
+      - '3001:3001'
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      # Proxy target inside the compose network.
+      BACKEND_URL: http://backend:3001
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend

@@ -33,10 +33,19 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
       'no-magic-numbers': 'off',
       '@typescript-eslint/no-magic-numbers': [
         'warn',
-        { ignore: [-1, 0, 1], ignoreEnums: true, ignoreReadonlyClassProperties: true },
+        {
+          // HTTP status codes are well-known; everything else gets a named constant.
+          ignore: [-1, 0, 1, 200, 201, 204, 400, 404, 409, 500],
+          ignoreEnums: true,
+          ignoreReadonlyClassProperties: true,
+        },
       ],
       // Cognitive-complexity / size caps — a flag means "extract a function".
       complexity: ['warn', 12],
@@ -129,6 +138,9 @@ export default tseslint.config(
       '@typescript-eslint/no-magic-numbers': 'off',
       'max-lines-per-function': 'off',
       'sonarjs/no-duplicate-string': 'off',
+      // supertest/response bodies are typed `any`; assertions on them are fine in tests.
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
     },
   },
 );
