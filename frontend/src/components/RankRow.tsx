@@ -24,10 +24,14 @@ interface RankRowProps {
 export function RankRow({ entry, onDelete, sortable }: Readonly<RankRowProps>): JSX.Element {
   const { game } = entry;
   return (
-    <li ref={sortable?.setNodeRef} style={sortable?.style} className="rank-row">
+    <li
+      ref={sortable?.setNodeRef}
+      style={sortable?.style}
+      className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3"
+    >
       {sortable && (
         <Button
-          className="drag-handle"
+          className="cursor-grab border-0 bg-transparent px-1 text-muted hover:bg-transparent hover:text-text"
           aria-label={`Reorder ${game.title}`}
           {...sortable.attributes}
           {...sortable.listeners}
@@ -35,13 +39,18 @@ export function RankRow({ entry, onDelete, sortable }: Readonly<RankRowProps>): 
           ⠿
         </Button>
       )}
-      <span className="rank">{entry.rank}</span>
+      <span className="w-6 text-center text-sm font-bold text-muted">{entry.rank}</span>
       {game.coverUrl ? (
-        <img src={game.coverUrl} alt={`${game.title} cover`} width={60} />
+        <img
+          src={game.coverUrl}
+          alt={`${game.title} cover`}
+          width={48}
+          className="h-12 w-auto rounded"
+        />
       ) : (
-        <span className="no-cover">No cover</span>
+        <span className="text-xs text-muted">No cover</span>
       )}
-      <span className="title">{game.title}</span>
+      <span className="flex-1 font-medium">{game.title}</span>
       <PlatformBadge platforms={game.platforms} />
       <Button aria-label={`Remove ${game.title}`} onClick={() => onDelete(entry.id)}>
         Remove

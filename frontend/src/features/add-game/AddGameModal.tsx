@@ -25,13 +25,14 @@ export function AddGameModal({ onSelect }: Readonly<AddGameModalProps>): JSX.Ele
   };
 
   return (
-    <section className="add-game">
+    <section className="space-y-2">
       <input
         type="search"
         value={query}
         placeholder="Search for a game…"
         aria-label="Search for a game"
         onChange={(e) => setQuery(e.target.value)}
+        className="w-full rounded-md border border-border bg-surface px-3 py-2 text-text placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       />
       {isFetching && <Loading label="Searching…" />}
       <ErrorBanner message={isError ? 'Search failed. Try again.' : null} />

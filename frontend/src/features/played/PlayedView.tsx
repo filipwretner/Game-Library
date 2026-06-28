@@ -26,14 +26,16 @@ export function PlayedView(): JSX.Element {
   const actionError = firstErrorMessage([addEntry, deleteEntry, reorderEntries]);
 
   return (
-    <section className="played-view">
-      <h2>Played</h2>
+    <section className="space-y-4">
+      <h2 className="text-xl font-semibold">Played</h2>
       <AddGameModal onSelect={handleAdd} />
       <ErrorBanner message={actionError} />
 
       {isPending && <Loading />}
       <ErrorBanner message={isError ? 'Could not load your Played list.' : null} />
-      {entries && entries.length === 0 && <p>No games yet — search above to add one.</p>}
+      {entries && entries.length === 0 && (
+        <p className="text-muted">No games yet — search above to add one.</p>
+      )}
       {entries && entries.length > 0 && (
         <RankList
           entries={entries}

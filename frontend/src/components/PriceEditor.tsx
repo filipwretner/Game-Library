@@ -26,8 +26,8 @@ export function PriceEditor({ price, currency, onSave }: Readonly<PriceEditorPro
   };
 
   return (
-    <span className="price-editor">
-      <span className="currency">{currency ?? 'USD'}</span>
+    <span className="inline-flex items-center gap-1.5">
+      <span className="text-xs text-muted">{currency ?? 'USD'}</span>
       <input
         type="number"
         min="0"
@@ -35,6 +35,7 @@ export function PriceEditor({ price, currency, onSave }: Readonly<PriceEditorPro
         value={value}
         aria-label="Price"
         onChange={(e) => setValue(e.target.value)}
+        className="w-20 rounded border border-border bg-surface px-2 py-1 text-text focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
       />
       <Button onClick={save}>Save price</Button>
     </span>

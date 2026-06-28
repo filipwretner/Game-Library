@@ -17,16 +17,23 @@ export function SearchResultGrid({
   onSelect,
 }: Readonly<SearchResultGridProps>): JSX.Element {
   return (
-    <ul className="search-result-grid">
+    <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       {results.map((game) => (
         <li key={game.igdbId}>
-          <Button onClick={() => onSelect(game)}>
+          <Button
+            onClick={() => onSelect(game)}
+            className="h-full w-full flex-col items-start gap-2 bg-surface p-2 text-left hover:bg-raised"
+          >
             {game.coverUrl ? (
-              <img src={game.coverUrl} alt={`${game.title} cover`} width={90} />
+              <img
+                src={game.coverUrl}
+                alt={`${game.title} cover`}
+                className="w-full rounded object-cover"
+              />
             ) : (
-              <span className="no-cover">No cover</span>
+              <span className="text-xs text-muted">No cover</span>
             )}
-            <span className="title">{game.title}</span>
+            <span className="text-sm font-medium">{game.title}</span>
             <PlatformBadge platforms={game.platforms} />
           </Button>
         </li>

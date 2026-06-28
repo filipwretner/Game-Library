@@ -17,15 +17,20 @@ interface GameCardProps {
 export function GameCard({ entry, onDelete, children }: Readonly<GameCardProps>): JSX.Element {
   const { game } = entry;
   return (
-    <li className="game-card">
+    <li className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-3">
       {game.coverUrl ? (
-        <img src={game.coverUrl} alt={`${game.title} cover`} width={80} />
+        <img
+          src={game.coverUrl}
+          alt={`${game.title} cover`}
+          width={48}
+          className="h-12 w-auto rounded"
+        />
       ) : (
-        <span className="no-cover">No cover</span>
+        <span className="text-xs text-muted">No cover</span>
       )}
-      <span className="title">{game.title}</span>
+      <span className="font-medium">{game.title}</span>
       <PlatformBadge platforms={game.platforms} />
-      <div className="card-actions">{children}</div>
+      <div className="ml-auto flex flex-wrap items-center gap-2">{children}</div>
       <Button aria-label={`Remove ${game.title}`} onClick={() => onDelete(entry.id)}>
         Remove
       </Button>

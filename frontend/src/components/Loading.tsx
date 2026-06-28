@@ -6,5 +6,5 @@ interface LoadingProps {
 
 /** The single source of truth for a loading indicator. */
 export function Loading({ label = 'Loading…' }: Readonly<LoadingProps>): JSX.Element {
-  return <p className="loading">{label}</p>;
+  return <p className="text-sm text-muted">{label}</p>;
 }

@@ -9,5 +9,8 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src", "vite.config.ts"]
+  // vite.config.ts is intentionally excluded from typecheck: Vite/Vitest load it via
+  // esbuild, and @tailwindcss/vite pulls a second (lightningcss) vite copy whose Plugin
+  // type only nominally differs, which would otherwise error here.
+  "include": ["src"]
 }

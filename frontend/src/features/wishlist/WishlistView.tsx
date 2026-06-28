@@ -48,21 +48,25 @@ export function WishlistView(): JSX.Element {
   ]);
 
   return (
-    <section className="wishlist-view">
-      <h2>Wishlist</h2>
-      {hasEntries && (
-        <p className="wishlist-total">
-          Total: {CURRENCY} {total.toFixed(MONEY_DECIMALS)}
-        </p>
-      )}
+    <section className="space-y-4">
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-xl font-semibold">Wishlist</h2>
+        {hasEntries && (
+          <p className="text-sm font-medium text-muted">
+            Total: {CURRENCY} {total.toFixed(MONEY_DECIMALS)}
+          </p>
+        )}
+      </div>
       <AddGameModal onSelect={handleAdd} />
       <ErrorBanner message={actionError} />
 
       {isPending && <Loading />}
       <ErrorBanner message={isError ? 'Could not load your Wishlist.' : null} />
-      {entries && entries.length === 0 && <p>Wishlist is empty — search above to add a game.</p>}
+      {entries && entries.length === 0 && (
+        <p className="text-muted">Wishlist is empty — search above to add a game.</p>
+      )}
       {hasEntries && (
-        <ul className="card-list">
+        <ul className="space-y-2">
           {entries.map((entry) => (
             <WishlistCard
               key={entry.id}

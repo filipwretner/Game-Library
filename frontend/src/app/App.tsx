@@ -19,10 +19,12 @@ export function App(): JSX.Element {
   const ActiveView = VIEWS[tab];
 
   return (
-    <main>
-      <h1>Game Tracker</h1>
+    <main className="mx-auto max-w-3xl px-4 py-8">
+      <h1 className="mb-6 text-3xl font-bold tracking-tight">Game Tracker</h1>
       <Tabs active={tab} onChange={setTab} />
-      <ActiveView />
+      <div className="mt-6">
+        <ActiveView />
+      </div>
     </main>
   );
 }

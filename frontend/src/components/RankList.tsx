@@ -44,7 +44,7 @@ export function RankList({ entries, onReorder, onDelete }: Readonly<RankListProp
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <ol className="rank-list">
+        <ol className="space-y-2">
           {entries.map((entry) => (
             <SortableRankRow key={entry.id} entry={entry} onDelete={onDelete} />
           ))}

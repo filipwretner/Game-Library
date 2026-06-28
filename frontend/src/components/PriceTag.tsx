@@ -24,13 +24,13 @@ export function PriceTag({
   currency,
 }: Readonly<PriceTagProps>): JSX.Element {
   if (price === null) {
-    return <span className="price-tag price-tag--empty">No price yet</span>;
+    return <span className="text-sm text-muted">No price yet</span>;
   }
   const onSale = discountPct !== null && discountPct > 0 && normalPrice !== null;
   return (
-    <span className="price-tag">
-      <span className="price">{format(currency, price)}</span>
-      {onSale && <s className="normal-price">{format(currency, normalPrice)}</s>}
+    <span className="inline-flex items-center gap-1.5">
+      <span className="font-medium">{format(currency, price)}</span>
+      {onSale && <s className="text-xs text-muted">{format(currency, normalPrice)}</s>}
     </span>
   );
 }

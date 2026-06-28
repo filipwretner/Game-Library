@@ -33,16 +33,18 @@ export function BacklogView(): JSX.Element {
   const actionError = firstErrorMessage([addEntry, moveEntry, deleteEntry]);
 
   return (
-    <section className="backlog-view">
-      <h2>Backlog</h2>
+    <section className="space-y-4">
+      <h2 className="text-xl font-semibold">Backlog</h2>
       <AddGameModal onSelect={handleAdd} />
       <ErrorBanner message={actionError} />
 
       {isPending && <Loading />}
       <ErrorBanner message={isError ? 'Could not load your Backlog.' : null} />
-      {entries && entries.length === 0 && <p>Backlog is empty — search above to add a game.</p>}
+      {entries && entries.length === 0 && (
+        <p className="text-muted">Backlog is empty — search above to add a game.</p>
+      )}
       {entries && entries.length > 0 && (
-        <ul className="card-list">
+        <ul className="space-y-2">
           {entries.map((entry) => (
             <GameCard key={entry.id} entry={entry} onDelete={deleteEntry.mutate}>
               <Button onClick={() => markCompleted(entry.id)}>Mark completed</Button>

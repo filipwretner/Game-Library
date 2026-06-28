@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+
+/* Design tokens (frontend/CLAUDE.md) — the single source of colour truth.
+   @theme exposes them as Tailwind utilities: bg-bg, text-muted, text-pc, bg-sale/15, … */
+@theme {
+  --color-bg: #0f1115;
+  --color-surface: #1a1d24;
+  --color-raised: #232730;
+  --color-border: #2c313b;
+
+  --color-text: #e6e8eb;
+  --color-muted: #9aa0aa;
+
+  --color-accent: #7c5cff;
+  --color-accent-hover: #6b4cf0;
+
+  --color-pc: #246ec2;
+  --color-ps5: #0070d1;
+
+  --color-sale: #38c172;
+  --color-danger: #e5484d;
+  --color-warning: #f5a623;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text antialiased;
+  }
+}
