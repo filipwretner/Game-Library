@@ -40,6 +40,7 @@ interface TwitchTokenResponse {
 
 export function createIgdbClient(creds: IgdbCredentials): IgdbClient {
   let cached: CachedToken | null = null;
+  let inFlight: Promise<CachedToken> | null = null;
 
   async function fetchToken(): Promise<CachedToken> {
     const url = `${TWITCH_TOKEN_URL}?client_id=${encodeURIComponent(creds.clientId)}&client_secret=${encodeURIComponent(creds.clientSecret)}&grant_type=client_credentials`;
@@ -56,7 +57,11 @@ export function createIgdbClient(creds: IgdbCredentials): IgdbClient {
 
   async function getToken(): Promise<string> {
     if (!cached || cached.expiresAt - Date.now() < REFRESH_MARGIN_MS) {
-      cached = await fetchToken();
+      // Share one in-flight request so concurrent calls don't each mint a token.
+      inFlight ??= fetchToken().finally(() => {
+        inFlight = null;
+      });
+      cached = await inFlight;
     }
     return cached.accessToken;
   }

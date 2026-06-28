@@ -57,7 +57,7 @@ export function WishlistView(): JSX.Element {
             <WishlistCard
               key={entry.id}
               entry={entry}
-              isFetching={fetchPrice.isPending}
+              isFetching={fetchPrice.isPending && fetchPrice.variables === entry.id}
               onDelete={deleteEntry.mutate}
               onFetchPrice={fetchPrice.mutate}
               onSavePrice={savePrice}

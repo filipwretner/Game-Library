@@ -24,9 +24,19 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (!res.ok) {
-    throw new ApiError(res.status, `${method} ${path} failed (${res.status})`);
+    const serverMessage = serverErrorMessage(await res.json().catch(() => null));
+    throw new ApiError(res.status, serverMessage ?? `${method} ${path} failed (${res.status})`);
   }
   return (res.status === HTTP_NO_CONTENT ? undefined : await res.json()) as T;
+}
+
+/** Pull `error.message` out of our `{ error: { code, message } }` envelope, if present. */
+function serverErrorMessage(payload: unknown): string | null {
+  if (payload === null || typeof payload !== 'object' || !('error' in payload)) return null;
+  const { error } = payload;
+  if (error === null || typeof error !== 'object' || !('message' in error)) return null;
+  const { message } = error;
+  return typeof message === 'string' ? message : null;
 }
 
 export function apiGet<T>(path: string): Promise<T> {

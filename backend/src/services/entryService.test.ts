@@ -92,6 +92,14 @@ describe('EntryService', () => {
     await expect(service.reorderPlayed([a.id, 999])).rejects.toBeInstanceOf(ValidationError);
   });
 
+  it('rejects a reorder containing duplicate ids', async () => {
+    const service = harness.container.entryService;
+    const a = await service.addEntry({ igdbId: 1, status: 'PLAYED' });
+    await service.addEntry({ igdbId: 2, status: 'PLAYED' });
+
+    await expect(service.reorderPlayed([a.id, a.id])).rejects.toBeInstanceOf(ValidationError);
+  });
+
   it('fetches a PC wishlist price and stores the quote', async () => {
     const quote: PriceQuote = {
       price: 6.24,

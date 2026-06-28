@@ -168,9 +168,10 @@ export class EntryService {
   }
 }
 
-/** True when both arrays contain the same ids (any order, no duplicates introduced). */
+/** True when both arrays are the same multiset of ids — rejects duplicates and gaps. */
 function isSamePermutation(a: readonly number[], b: readonly number[]): boolean {
   if (a.length !== b.length) return false;
-  const set = new Set(b);
-  return a.every((id) => set.has(id));
+  const sortedA = [...a].sort((x, y) => x - y);
+  const sortedB = [...b].sort((x, y) => x - y);
+  return sortedA.every((id, i) => id === sortedB[i]);
 }

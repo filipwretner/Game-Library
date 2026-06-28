@@ -15,6 +15,7 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     res.status(err.status).json({ error: { code: err.code, message: err.message } });
     return;
   }
-  const message = err instanceof Error ? err.message : 'Unexpected error';
-  res.status(500).json({ error: { code: 'INTERNAL', message } });
+  // Unexpected error: log the detail server-side, never leak it to the client.
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: { code: 'INTERNAL', message: 'Internal server error' } });
 };

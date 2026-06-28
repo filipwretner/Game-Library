@@ -4,19 +4,28 @@ import type { PriceProvider } from '../ports.js';
 import { pickBestDeal, type DealCandidate } from '../../domain/pricing.js';
 
 /**
- * Maps CheapShark responses onto the PriceProvider port (spec §2.2). Services
- * depend on the port, so swapping in ITAD later is a one-file change.
+ * Maps CheapShark responses onto the PriceProvider port (spec §2.2). Resolves the
+ * title to a single best-matching game, then picks the cheapest deal *for that
+ * game* — so a cheaper, similarly-named title can never hijack the price.
  */
 
 const CURRENCY = 'USD';
 const REDIRECT_URL = 'https://www.cheapshark.com/redirect';
 
-interface RawDeal {
-  salePrice?: string;
-  normalPrice?: string;
-  savings?: string;
+interface RawGameSummary {
+  gameID?: string;
+}
+
+interface RawGameDeal {
   storeID?: string;
   dealID?: string;
+  price?: string;
+  retailPrice?: string;
+  savings?: string;
+}
+
+interface RawGameDetail {
+  deals?: RawGameDeal[];
 }
 
 interface RawStore {
@@ -30,8 +39,12 @@ export class CheapsharkPriceProvider implements PriceProvider {
   constructor(private readonly client: CheapsharkClient) {}
 
   async getBestPrice(title: string): Promise<PriceQuote | null> {
-    const rawDeals = (await this.client.deals(title)) as RawDeal[];
-    const best = pickBestDeal(rawDeals.map(toCandidate).filter(isValidDeal));
+    const summaries = (await this.client.gameSummaries(title)) as RawGameSummary[];
+    const gameId = summaries[0]?.gameID;
+    if (!gameId) return null;
+
+    const detail = (await this.client.gameDeals(gameId)) as RawGameDetail;
+    const best = pickBestDeal((detail.deals ?? []).map(toCandidate).filter(isValidDeal));
     if (!best) return null;
 
     return {
@@ -45,7 +58,10 @@ export class CheapsharkPriceProvider implements PriceProvider {
   }
 
   private async storeName(storeId: string): Promise<string> {
-    this.storeNames ??= await this.loadStores();
+    // Only cache a populated map, so a one-off empty /stores response can recover.
+    if (!this.storeNames || this.storeNames.size === 0) {
+      this.storeNames = await this.loadStores();
+    }
     return this.storeNames.get(storeId) ?? 'Unknown store';
   }
 
@@ -55,10 +71,10 @@ export class CheapsharkPriceProvider implements PriceProvider {
   }
 }
 
-function toCandidate(deal: RawDeal): DealCandidate {
+function toCandidate(deal: RawGameDeal): DealCandidate {
   return {
-    salePrice: Number.parseFloat(deal.salePrice ?? 'NaN'),
-    normalPrice: Number.parseFloat(deal.normalPrice ?? 'NaN'),
+    salePrice: Number.parseFloat(deal.price ?? 'NaN'),
+    normalPrice: Number.parseFloat(deal.retailPrice ?? 'NaN'),
     savings: Number.parseFloat(deal.savings ?? '0'),
     storeId: deal.storeID ?? '',
     dealId: deal.dealID ?? '',
