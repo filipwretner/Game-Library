@@ -7,8 +7,11 @@ import { CheapsharkPriceProvider } from './integrations/cheapshark/cheapsharkPri
 import { prisma } from './repositories/prisma/prismaClient.js';
 import { PrismaEntriesRepo } from './repositories/prisma/prismaEntriesRepo.js';
 import { PrismaGamesRepo } from './repositories/prisma/prismaGamesRepo.js';
+import { PrismaCustomListsRepo } from './repositories/prisma/prismaCustomListsRepo.js';
 import { SearchService } from './services/searchService.js';
 import { EntryService } from './services/entryService.js';
+import { CustomListService } from './services/customListService.js';
+import { GameCatalog } from './services/gameCatalog.js';
 
 /**
  * Application container (spec §7.3). Holds the wired services the HTTP layer
@@ -19,6 +22,7 @@ import { EntryService } from './services/entryService.js';
 export interface AppContainer {
   searchService: SearchService;
   entryService: EntryService;
+  customListService: CustomListService;
 }
 
 /** Composition root: concrete impls → services. The only place they are wired. */
@@ -27,10 +31,13 @@ export function buildContainer(env: Env): AppContainer {
   const priceProvider = new CheapsharkPriceProvider(createCheapsharkClient());
   const gamesRepo = new PrismaGamesRepo(prisma);
   const entriesRepo = new PrismaEntriesRepo(prisma);
+  const customListsRepo = new PrismaCustomListsRepo(prisma);
+  const catalog = new GameCatalog(gamesRepo, metadataProvider);
 
   return {
     searchService: new SearchService(metadataProvider),
-    entryService: new EntryService(entriesRepo, gamesRepo, metadataProvider, priceProvider),
+    entryService: new EntryService(entriesRepo, catalog, priceProvider),
+    customListService: new CustomListService(customListsRepo, catalog),
   };
 }
 

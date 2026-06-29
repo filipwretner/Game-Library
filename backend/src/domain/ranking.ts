@@ -14,3 +14,11 @@ const FIRST_RANK = 1;
 export function recomputeRanks(orderedIds: readonly number[]): RankAssignment[] {
   return orderedIds.map((id, index) => ({ id, rank: index + FIRST_RANK }));
 }
+
+/** True when both arrays are the same multiset of ids — rejects duplicates and gaps. */
+export function isSameIdSet(a: readonly number[], b: readonly number[]): boolean {
+  if (a.length !== b.length) return false;
+  const sortedA = [...a].sort((x, y) => x - y);
+  const sortedB = [...b].sort((x, y) => x - y);
+  return sortedA.every((id, i) => id === sortedB[i]);
+}

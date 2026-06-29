@@ -1,4 +1,7 @@
 import type {
+  CustomList,
+  CustomListEntry,
+  CustomListEntryWithGame,
   Entry,
   EntryStatus,
   EntryWithGame,
@@ -8,8 +11,10 @@ import type {
 } from '@game-tracker/shared';
 import type {
   CreateEntryInput,
+  CustomListsRepo,
   EntriesRepo,
   GamesRepo,
+  RankAssignments,
   UpdateEntryInput,
 } from '../repositories/ports.js';
 import type {
@@ -20,6 +25,8 @@ import type {
 import type { AppContainer } from '../container.js';
 import { SearchService } from '../services/searchService.js';
 import { EntryService } from '../services/entryService.js';
+import { CustomListService } from '../services/customListService.js';
+import { GameCatalog } from '../services/gameCatalog.js';
 
 /**
  * In-memory fakes for the ports (spec §11.3). Let services and HTTP routes be
@@ -147,6 +154,83 @@ export class FakePriceProvider implements PriceProvider {
   }
 }
 
+export class InMemoryCustomListsRepo implements CustomListsRepo {
+  private readonly lists: CustomList[] = [];
+  private readonly entries: CustomListEntry[] = [];
+  private listSeq = 0;
+  private entrySeq = 0;
+
+  constructor(private readonly games: InMemoryGamesRepo) {}
+
+  createList(title: string): Promise<CustomList> {
+    const list: CustomList = { id: ++this.listSeq, title, createdAt: new Date().toISOString() };
+    this.lists.push(list);
+    return Promise.resolve(list);
+  }
+
+  findAllLists(): Promise<CustomList[]> {
+    return Promise.resolve([...this.lists]);
+  }
+
+  findListById(id: number): Promise<CustomList | null> {
+    return Promise.resolve(this.lists.find((l) => l.id === id) ?? null);
+  }
+
+  deleteList(id: number): Promise<void> {
+    remove(this.lists, (l) => l.id === id);
+    removeAll(this.entries, (e) => e.listId === id);
+    return Promise.resolve();
+  }
+
+  findEntriesByList(listId: number): Promise<CustomListEntryWithGame[]> {
+    const list = this.entries
+      .filter((e) => e.listId === listId)
+      .sort((a, b) => a.rank - b.rank)
+      .map((e) => this.join(e));
+    return Promise.resolve(list);
+  }
+
+  findEntryByGame(listId: number, gameId: number): Promise<CustomListEntry | null> {
+    return Promise.resolve(
+      this.entries.find((e) => e.listId === listId && e.gameId === gameId) ?? null,
+    );
+  }
+
+  maxRank(listId: number): Promise<number | null> {
+    const ranks = this.entries.filter((e) => e.listId === listId).map((e) => e.rank);
+    return Promise.resolve(ranks.length ? Math.max(...ranks) : null);
+  }
+
+  addEntry(input: { listId: number; gameId: number; rank: number }): Promise<CustomListEntry> {
+    const entry: CustomListEntry = {
+      id: ++this.entrySeq,
+      ...input,
+      createdAt: new Date().toISOString(),
+    };
+    this.entries.push(entry);
+    return Promise.resolve(entry);
+  }
+
+  deleteEntry(entryId: number): Promise<void> {
+    remove(this.entries, (e) => e.id === entryId);
+    return Promise.resolve();
+  }
+
+  setRanks(rankings: RankAssignments): Promise<void> {
+    for (const { id, rank } of rankings) {
+      const entry = this.entries.find((e) => e.id === id);
+      if (entry) entry.rank = rank;
+    }
+    return Promise.resolve();
+  }
+
+  private join(entry: CustomListEntry): CustomListEntryWithGame {
+    const game = this.games.byId.get(entry.gameId);
+    if (!game) throw new Error(`game ${entry.gameId} missing for list entry ${entry.id}`);
+    return { ...entry, game };
+  }
+}
+
 export interface TestHarness {
   container: AppContainer;
   games: InMemoryGamesRepo;
@@ -163,12 +247,25 @@ export function buildTestHarness(
   const prices = new FakePriceProvider(priceQuote);
   const games = new InMemoryGamesRepo();
   const entries = new InMemoryEntriesRepo(games);
+  const catalog = new GameCatalog(games, provider);
 
   const container: AppContainer = {
     searchService: new SearchService(provider),
-    entryService: new EntryService(entries, games, provider, prices),
+    entryService: new EntryService(entries, catalog, prices),
+    customListService: new CustomListService(new InMemoryCustomListsRepo(games), catalog),
   };
   return { container, games, entries };
+}
+
+function remove<T>(arr: T[], match: (item: T) => boolean): void {
+  const index = arr.findIndex(match);
+  if (index >= 0) arr.splice(index, 1);
+}
+
+function removeAll<T>(arr: T[], match: (item: T) => boolean): void {
+  for (let i = arr.length - 1; i >= 0; i--) {
+    if (match(arr[i] as T)) arr.splice(i, 1);
+  }
 }
 
 function compareEntries(a: Entry, b: Entry): number {

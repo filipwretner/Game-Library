@@ -14,30 +14,30 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { EntryWithGame } from '../types/index.ts';
-import { EntryCard } from './EntryCard.tsx';
+import { EntryCard, type CardEntry } from './EntryCard.tsx';
 
 const DRAGGING_OPACITY = 0.6;
 
-interface SortableListProps {
-  entries: EntryWithGame[];
+interface SortableListProps<T extends CardEntry> {
+  entries: T[];
   onReorder: (orderedIds: number[]) => void;
   onDelete: (id: number) => void;
   /** Per-entry bottom-row actions for the current list. */
-  renderActions?: (entry: EntryWithGame) => ReactNode;
+  renderActions?: (entry: T) => ReactNode;
 }
 
 /**
- * Drag-to-reorder list used by every view (spec §8.5). Owns all dnd wiring; the
- * cards stay presentational. On drop it computes the new id order and hands it
- * to onReorder.
+ * Drag-to-reorder list used by every view (spec §8.5), generic over the entry
+ * type (core entries or custom-list entries). Owns all dnd wiring; the cards
+ * stay presentational. On drop it computes the new id order and hands it to
+ * onReorder.
  */
-export function SortableList({
+export function SortableList<T extends CardEntry>({
   entries,
   onReorder,
   onDelete,
   renderActions,
-}: Readonly<SortableListProps>): JSX.Element {
+}: Readonly<SortableListProps<T>>): JSX.Element {
   const sensors = useSensors(useSensor(PointerSensor));
   const ids = entries.map((e) => e.id);
 
@@ -68,7 +68,7 @@ export function SortableList({
 }
 
 interface SortableEntryCardProps {
-  entry: EntryWithGame;
+  entry: CardEntry;
   onDelete: (id: number) => void;
   actions?: ReactNode;
 }

@@ -2,12 +2,13 @@ import type { JSX } from 'react';
 import { Button } from './Button.tsx';
 import { cn } from '../lib/cn.ts';
 
-export type TabKey = 'PLAYED' | 'BACKLOG' | 'WISHLIST';
+export type TabKey = 'PLAYED' | 'BACKLOG' | 'WISHLIST' | 'LISTS';
 
 const TAB_LABELS: ReadonlyArray<{ key: TabKey; label: string }> = [
   { key: 'PLAYED', label: 'Played' },
   { key: 'BACKLOG', label: 'Backlog' },
   { key: 'WISHLIST', label: 'Wishlist' },
+  { key: 'LISTS', label: 'Lists' },
 ];
 
 interface TabsProps {

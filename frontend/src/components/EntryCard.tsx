@@ -1,9 +1,16 @@
 import type { CSSProperties, JSX, ReactNode } from 'react';
 import type { useSortable } from '@dnd-kit/sortable';
 import { releaseYear } from '@game-tracker/shared';
-import type { EntryWithGame } from '../types/index.ts';
+import type { Game } from '../types/index.ts';
 import { PlatformBadge } from './PlatformBadge.tsx';
 import { Button } from './Button.tsx';
+
+/** Minimal shape the card needs — satisfied by both core entries and custom-list entries. */
+export interface CardEntry {
+  id: number;
+  rank: number | null;
+  game: Game;
+}
 
 /** Drag bindings supplied by the sortable list. Optional so the card renders standalone. */
 export type SortableBindings = Pick<
@@ -12,7 +19,7 @@ export type SortableBindings = Pick<
 > & { style: CSSProperties };
 
 interface EntryCardProps {
-  entry: EntryWithGame;
+  entry: CardEntry;
   onDelete: (id: number) => void;
   /** View-specific bottom-row content (price, move buttons). */
   actions?: ReactNode;

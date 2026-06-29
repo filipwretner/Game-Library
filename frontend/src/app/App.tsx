@@ -3,11 +3,13 @@ import { Tabs, type TabKey } from '../components/Tabs.tsx';
 import { PlayedView } from '../features/played/PlayedView.tsx';
 import { BacklogView } from '../features/backlog/BacklogView.tsx';
 import { WishlistView } from '../features/wishlist/WishlistView.tsx';
+import { ListsView } from '../features/lists/ListsView.tsx';
 
 const VIEWS: Record<TabKey, ComponentType> = {
   PLAYED: PlayedView,
   BACKLOG: BacklogView,
   WISHLIST: WishlistView,
+  LISTS: ListsView,
 };
 
 /**

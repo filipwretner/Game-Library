@@ -1,4 +1,16 @@
-import type { Entry, EntryStatus, EntryWithGame, Game, GameMetadata } from '@game-tracker/shared';
+import type {
+  CustomList,
+  CustomListEntry,
+  CustomListEntryWithGame,
+  Entry,
+  EntryStatus,
+  EntryWithGame,
+  Game,
+  GameMetadata,
+} from '@game-tracker/shared';
+
+/** Batch of rank assignments applied atomically (drag-and-drop reorder). */
+export type RankAssignments = ReadonlyArray<{ id: number; rank: number }>;
 
 /**
  * Repository ports (spec §7.1 layer 4). The ONLY abstraction services depend on
@@ -36,5 +48,18 @@ export interface EntriesRepo {
   update(id: number, patch: UpdateEntryInput): Promise<Entry>;
   delete(id: number): Promise<void>;
   /** Apply a batch of rank assignments atomically (drag-and-drop reorder). */
-  setRanks(rankings: ReadonlyArray<{ id: number; rank: number }>): Promise<void>;
+  setRanks(rankings: RankAssignments): Promise<void>;
+}
+
+export interface CustomListsRepo {
+  createList(title: string): Promise<CustomList>;
+  findAllLists(): Promise<CustomList[]>;
+  findListById(id: number): Promise<CustomList | null>;
+  deleteList(id: number): Promise<void>;
+  findEntriesByList(listId: number): Promise<CustomListEntryWithGame[]>;
+  findEntryByGame(listId: number, gameId: number): Promise<CustomListEntry | null>;
+  maxRank(listId: number): Promise<number | null>;
+  addEntry(input: { listId: number; gameId: number; rank: number }): Promise<CustomListEntry>;
+  deleteEntry(entryId: number): Promise<void>;
+  setRanks(rankings: RankAssignments): Promise<void>;
 }

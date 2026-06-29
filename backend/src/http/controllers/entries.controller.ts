@@ -1,7 +1,6 @@
-import type { z } from 'zod';
 import type { EntryService } from '../../services/entryService.js';
 import type { AsyncRequestHandler } from '../middleware/asyncHandler.js';
-import { ValidationError } from '../../domain/errors.js';
+import { parse } from '../parse.js';
 import {
   createEntrySchema,
   entryIdParamSchema,
@@ -56,12 +55,4 @@ export function makeEntriesController(entryService: EntryService): EntriesContro
       res.json(await entryService.wishlistTotal());
     },
   };
-}
-
-function parse<T>(schema: z.ZodType<T>, data: unknown): T {
-  const result = schema.safeParse(data);
-  if (!result.success) {
-    throw new ValidationError(result.error.issues[0]?.message ?? 'Invalid request');
-  }
-  return result.data;
 }

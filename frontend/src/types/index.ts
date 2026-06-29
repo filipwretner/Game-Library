@@ -3,6 +3,9 @@
  * place and never redeclares cross-stack shapes (spec §8.3).
  */
 export type {
+  CustomList,
+  CustomListEntry,
+  CustomListEntryWithGame,
   Entry,
   EntryStatus,
   EntryWithGame,

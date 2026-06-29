@@ -1,10 +1,11 @@
 import { preferredPlatform, wishlistTotal } from '@game-tracker/shared';
 import type { EntryStatus, EntryWithGame, Game, Platform } from '@game-tracker/shared';
-import type { EntriesRepo, GamesRepo, UpdateEntryInput } from '../repositories/ports.js';
-import type { MetadataProvider, PriceProvider } from '../integrations/ports.js';
+import type { EntriesRepo, UpdateEntryInput } from '../repositories/ports.js';
+import type { PriceProvider } from '../integrations/ports.js';
 import { ConflictError, NotFoundError, ValidationError } from '../domain/errors.js';
 import { resetFieldsForStatus } from '../domain/entryRules.js';
-import { recomputeRanks } from '../domain/ranking.js';
+import { isSameIdSet, recomputeRanks } from '../domain/ranking.js';
+import type { GameCatalog } from './gameCatalog.js';
 
 export interface WishlistTotal {
   total: number;
@@ -31,8 +32,7 @@ const FIRST_RANK = 1;
 export class EntryService {
   constructor(
     private readonly entries: EntriesRepo,
-    private readonly games: GamesRepo,
-    private readonly metadata: MetadataProvider,
+    private readonly catalog: GameCatalog,
     private readonly prices: PriceProvider,
   ) {}
 
@@ -41,7 +41,7 @@ export class EntryService {
   }
 
   async addEntry(input: AddEntryInput): Promise<EntryWithGame> {
-    const game = await this.resolveGame(input.igdbId);
+    const game = await this.catalog.resolveByIgdbId(input.igdbId);
 
     const existing = await this.entries.findByGameId(game.id);
     if (existing) {
@@ -79,7 +79,7 @@ export class EntryService {
   async reorderEntries(status: EntryStatus, orderedEntryIds: number[]): Promise<EntryWithGame[]> {
     const current = await this.entries.findByStatus(status);
     if (
-      !isSamePermutation(
+      !isSameIdSet(
         orderedEntryIds,
         current.map((e) => e.id),
       )
@@ -137,17 +137,6 @@ export class EntryService {
     };
   }
 
-  private async resolveGame(igdbId: number): Promise<Game> {
-    const cached = await this.games.findByIgdbId(igdbId);
-    if (cached) return cached;
-
-    const metadata = await this.metadata.getByIgdbId(igdbId);
-    if (!metadata) {
-      throw new NotFoundError(`No IGDB game found for id ${igdbId}`);
-    }
-    return this.games.upsertByIgdbId(metadata);
-  }
-
   private resolveOwnedPlatform(input: AddEntryInput, game: Game): Platform | null {
     if (input.status === 'WISHLIST') return null;
     return input.ownedPlatform ?? preferredPlatform(game.platforms);
@@ -166,12 +155,4 @@ export class EntryService {
     }
     return entry;
   }
-}
-
-/** True when both arrays are the same multiset of ids — rejects duplicates and gaps. */
-function isSamePermutation(a: readonly number[], b: readonly number[]): boolean {
-  if (a.length !== b.length) return false;
-  const sortedA = [...a].sort((x, y) => x - y);
-  const sortedB = [...b].sort((x, y) => x - y);
-  return sortedA.every((id, i) => id === sortedB[i]);
 }

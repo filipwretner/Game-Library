@@ -70,6 +70,28 @@ export interface EntryWithGame extends Entry {
   game: Game;
 }
 
+/** A user-created list (spec: custom lists, e.g. "Top 10 of 2024"). */
+export interface CustomList {
+  id: number;
+  title: string;
+  createdAt: string;
+}
+
+/** A game's membership + rank within one custom list. */
+export interface CustomListEntry {
+  id: number;
+  listId: number;
+  gameId: number;
+  /** Position within the list, 1 = top. */
+  rank: number;
+  createdAt: string;
+}
+
+/** A custom-list entry joined with its cached game metadata — the read shape. */
+export interface CustomListEntryWithGame extends CustomListEntry {
+  game: Game;
+}
+
 /** A normalised price result from a PriceProvider (CheapShark today). */
 export interface PriceQuote {
   price: number;

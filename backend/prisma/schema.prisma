@@ -25,7 +25,31 @@ model Game {
   igdbRating  Float?
   cachedAt    DateTime @default(now())
 
-  entry Entry?
+  entry        Entry?
+  customEntries CustomListEntry[]
+}
+
+/// A user-created list (e.g. "Top 10 Games of 2024"). Independent of the three
+/// core lists; a game may be here and on a core list at the same time.
+model CustomList {
+  id        Int               @id @default(autoincrement())
+  title     String
+  createdAt DateTime          @default(now())
+  entries   CustomListEntry[]
+}
+
+/// A game's membership + rank within one custom list.
+model CustomListEntry {
+  id        Int        @id @default(autoincrement())
+  listId    Int
+  list      CustomList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  gameId    Int
+  game      Game       @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  rank      Int
+  createdAt DateTime   @default(now())
+
+  @@unique([listId, gameId])
+  @@index([listId, rank])
 }
 
 /// A game's presence on exactly one list (PLAYED | BACKLOG | WISHLIST).

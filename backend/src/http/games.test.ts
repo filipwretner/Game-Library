@@ -3,15 +3,24 @@ import request from 'supertest';
 import { createApp } from '../app.js';
 import { SearchService } from '../services/searchService.js';
 import { EntryService } from '../services/entryService.js';
-import { FakePriceProvider, InMemoryEntriesRepo, InMemoryGamesRepo } from '../test/fakes.js';
+import { CustomListService } from '../services/customListService.js';
+import { GameCatalog } from '../services/gameCatalog.js';
+import {
+  FakePriceProvider,
+  InMemoryCustomListsRepo,
+  InMemoryEntriesRepo,
+  InMemoryGamesRepo,
+} from '../test/fakes.js';
 import type { MetadataProvider, MetadataSearchResult } from '../integrations/ports.js';
 
 function appWith(metadata: MetadataProvider) {
   const games = new InMemoryGamesRepo();
   const entries = new InMemoryEntriesRepo(games);
+  const catalog = new GameCatalog(games, metadata);
   return createApp({
     searchService: new SearchService(metadata),
-    entryService: new EntryService(entries, games, metadata, new FakePriceProvider()),
+    entryService: new EntryService(entries, catalog, new FakePriceProvider()),
+    customListService: new CustomListService(new InMemoryCustomListsRepo(games), catalog),
   });
 }
 

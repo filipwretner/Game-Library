@@ -3,6 +3,7 @@ import type { AppContainer } from './container.js';
 import { healthRoutes } from './http/routes/health.routes.js';
 import { gamesRoutes } from './http/routes/games.routes.js';
 import { entriesRoutes } from './http/routes/entries.routes.js';
+import { listsRoutes } from './http/routes/lists.routes.js';
 import { errorHandler, notFoundHandler } from './http/middleware/errorHandler.js';
 
 /**
@@ -18,6 +19,7 @@ export function createApp(container: AppContainer): Express {
   api.use(healthRoutes());
   api.use(gamesRoutes(container.searchService));
   api.use(entriesRoutes(container.entryService));
+  api.use(listsRoutes(container.customListService));
   app.use('/api', api);
 
   app.use(notFoundHandler);
