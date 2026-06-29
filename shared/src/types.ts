@@ -50,6 +50,8 @@ export interface GameSearchResult {
   title: string;
   coverUrl: string | null;
   platforms: number[];
+  /** ISO date of the original release (IGDB first_release_date), or null. */
+  releaseDate: string | null;
 }
 
 /** Full metadata for one game from IGDB — the upsert input for the `games` table. */

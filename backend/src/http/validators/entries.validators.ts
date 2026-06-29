@@ -39,6 +39,7 @@ export const updateEntrySchema = z
   .partial();
 
 export const reorderSchema = z.object({
+  status: entryStatusSchema,
   orderedEntryIds: z.array(z.number().int().positive()).min(1),
 });
 

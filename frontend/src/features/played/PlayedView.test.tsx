@@ -39,6 +39,7 @@ const searchHit = vi.hoisted((): GameSearchResult => ({
   title: 'Hades',
   coverUrl: null,
   platforms: [6],
+  releaseDate: '2020-09-17T00:00:00.000Z',
 }));
 
 const entriesMock = vi.hoisted(() => ({

@@ -1,37 +1,34 @@
 import type { JSX } from 'react';
 import { preferredPlatform } from '@game-tracker/shared';
 import type { EntryWithGame } from '../../types/index.ts';
-import { GameCard } from '../../components/GameCard.tsx';
 import { PriceEditor } from '../../components/PriceEditor.tsx';
 import { PriceTag } from '../../components/PriceTag.tsx';
 import { SaleBadge } from '../../components/SaleBadge.tsx';
 import { Button } from '../../components/Button.tsx';
 
-interface WishlistCardProps {
+interface WishlistActionsProps {
   entry: EntryWithGame;
   isFetching: boolean;
-  onDelete: (id: number) => void;
   onFetchPrice: (id: number) => void;
   onSavePrice: (id: number, price: number) => void;
   onMoveToBacklog: (id: number) => void;
 }
 
 /**
- * One wishlist row: price + sale display, plus PC auto-fetch or PS5 manual entry
- * (spec §6/§8.5). The PC-vs-PS5 decision comes from the shared platform rule.
+ * Bottom-row content for a wishlist card: price + sale display, then PC
+ * auto-fetch or PS5 manual entry (spec §6/§8.5), plus "To Backlog". The PC-vs-PS5
+ * decision comes from the shared platform rule.
  */
-export function WishlistCard({
+export function WishlistActions({
   entry,
   isFetching,
-  onDelete,
   onFetchPrice,
   onSavePrice,
   onMoveToBacklog,
-}: Readonly<WishlistCardProps>): JSX.Element {
+}: Readonly<WishlistActionsProps>): JSX.Element {
   const isPc = preferredPlatform(entry.game.platforms) === 'PC';
-
   return (
-    <GameCard entry={entry} onDelete={onDelete}>
+    <>
       <PriceTag
         price={entry.price}
         normalPrice={entry.normalPrice}
@@ -51,6 +48,6 @@ export function WishlistCard({
         />
       )}
       <Button onClick={() => onMoveToBacklog(entry.id)}>To Backlog</Button>
-    </GameCard>
+    </>
   );
 }

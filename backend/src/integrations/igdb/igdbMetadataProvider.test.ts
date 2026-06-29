@@ -7,13 +7,14 @@ function fakeClient(rows: unknown): IgdbClient {
 }
 
 describe('IgdbMetadataProvider.search', () => {
-  it('maps IGDB rows onto the port shape', async () => {
+  it('maps IGDB rows onto the port shape including the release date', async () => {
     const client = fakeClient([
       {
         id: 1942,
         name: 'The Witcher 3',
         cover: { url: '//images.igdb.com/igdb/image/upload/t_thumb/abc.jpg' },
         platforms: [6, 167],
+        first_release_date: 1431993600,
       },
     ]);
     const result = await new IgdbMetadataProvider(client).search('witcher');
@@ -24,22 +25,30 @@ describe('IgdbMetadataProvider.search', () => {
         title: 'The Witcher 3',
         coverUrl: 'https://images.igdb.com/igdb/image/upload/t_cover_big/abc.jpg',
         platforms: [6, 167],
+        releaseDate: '2015-05-19T00:00:00.000Z',
       },
     ]);
   });
 
-  it('defaults missing cover and platforms', async () => {
+  it('defaults missing cover, platforms and release date', async () => {
     const client = fakeClient([{ id: 7, name: 'No Art Game' }]);
     const [row] = await new IgdbMetadataProvider(client).search('x');
 
-    expect(row).toEqual({ igdbId: 7, title: 'No Art Game', coverUrl: null, platforms: [] });
+    expect(row).toEqual({
+      igdbId: 7,
+      title: 'No Art Game',
+      coverUrl: null,
+      platforms: [],
+      releaseDate: null,
+    });
   });
 
-  it('escapes quotes in the search term', async () => {
+  it('searches only main games (game_type 0) and escapes quotes', async () => {
     const client = fakeClient([]);
     await new IgdbMetadataProvider(client).search('say "hi"');
 
     const body = (client.query as ReturnType<typeof vi.fn>).mock.calls[0]?.[1] as string;
     expect(body).toContain('search "say \\"hi\\"";');
+    expect(body).toContain('where game_type = 0;');
   });
 });

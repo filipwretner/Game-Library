@@ -15,14 +15,18 @@ const CLEARED_PRICE_FIELDS = {
   priceUpdatedAt: null,
 } as const satisfies Partial<Entry>;
 
-/** Status-specific fields to reset when an entry transitions to `status`. */
+/**
+ * Status-specific fields to reset when an entry transitions to `status`. The new
+ * `rank` is assigned by the service (it needs the DB), so it's not set here. Every
+ * list is now ordered, so `rank` is never cleared.
+ */
 export function resetFieldsForStatus(status: EntryStatus): Partial<Entry> {
   switch (status) {
     case 'PLAYED':
-      return { ...CLEARED_PRICE_FIELDS, rank: null };
+      return { ...CLEARED_PRICE_FIELDS };
     case 'BACKLOG':
-      return { ...CLEARED_PRICE_FIELDS, rank: null, dateCompleted: null };
+      return { ...CLEARED_PRICE_FIELDS, dateCompleted: null };
     case 'WISHLIST':
-      return { rank: null, dateCompleted: null, ownedPlatform: null };
+      return { dateCompleted: null, ownedPlatform: null };
   }
 }

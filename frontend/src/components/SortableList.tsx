@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 import {
   DndContext,
   PointerSensor,
@@ -15,21 +15,29 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { EntryWithGame } from '../types/index.ts';
-import { RankRow } from './RankRow.tsx';
+import { EntryCard } from './EntryCard.tsx';
 
 const DRAGGING_OPACITY = 0.6;
 
-interface RankListProps {
+interface SortableListProps {
   entries: EntryWithGame[];
   onReorder: (orderedIds: number[]) => void;
   onDelete: (id: number) => void;
+  /** Per-entry bottom-row actions for the current list. */
+  renderActions?: (entry: EntryWithGame) => ReactNode;
 }
 
 /**
- * The ranked Played list (spec §8.5). Owns all drag-and-drop wiring; rows stay
- * presentational. On drop it computes the new id order and hands it to onReorder.
+ * Drag-to-reorder list used by every view (spec §8.5). Owns all dnd wiring; the
+ * cards stay presentational. On drop it computes the new id order and hands it
+ * to onReorder.
  */
-export function RankList({ entries, onReorder, onDelete }: Readonly<RankListProps>): JSX.Element {
+export function SortableList({
+  entries,
+  onReorder,
+  onDelete,
+  renderActions,
+}: Readonly<SortableListProps>): JSX.Element {
   const sensors = useSensors(useSensor(PointerSensor));
   const ids = entries.map((e) => e.id);
 
@@ -46,7 +54,12 @@ export function RankList({ entries, onReorder, onDelete }: Readonly<RankListProp
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <ol className="space-y-2">
           {entries.map((entry) => (
-            <SortableRankRow key={entry.id} entry={entry} onDelete={onDelete} />
+            <SortableEntryCard
+              key={entry.id}
+              entry={entry}
+              onDelete={onDelete}
+              actions={renderActions?.(entry)}
+            />
           ))}
         </ol>
       </SortableContext>
@@ -54,13 +67,18 @@ export function RankList({ entries, onReorder, onDelete }: Readonly<RankListProp
   );
 }
 
-interface SortableRankRowProps {
+interface SortableEntryCardProps {
   entry: EntryWithGame;
   onDelete: (id: number) => void;
+  actions?: ReactNode;
 }
 
-/** Binds one row to dnd-kit; the row markup stays in the presentational RankRow. */
-function SortableRankRow({ entry, onDelete }: Readonly<SortableRankRowProps>): JSX.Element {
+/** Binds one card to dnd-kit; the markup stays in the presentational EntryCard. */
+function SortableEntryCard({
+  entry,
+  onDelete,
+  actions,
+}: Readonly<SortableEntryCardProps>): JSX.Element {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: entry.id,
   });
@@ -70,9 +88,10 @@ function SortableRankRow({ entry, onDelete }: Readonly<SortableRankRowProps>): J
     opacity: isDragging ? DRAGGING_OPACITY : 1,
   };
   return (
-    <RankRow
+    <EntryCard
       entry={entry}
       onDelete={onDelete}
+      actions={actions}
       sortable={{ attributes, listeners, setNodeRef, style }}
     />
   );

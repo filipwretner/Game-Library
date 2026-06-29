@@ -1,43 +1,39 @@
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { EntryWithGame } from '../../types/index.ts';
+import type { EntryStatus, EntryWithGame } from '../../types/index.ts';
 import { entriesApi } from '../../api/entriesApi.ts';
-
-const PLAYED_KEY = ['entries', 'PLAYED'] as const;
 
 interface ReorderContext {
   previous: EntryWithGame[] | undefined;
 }
 
 /**
- * Commit a Played reorder (spec §8.5). Optimistically reorders the cached list
- * so the drag feels instant, rolls back on error, and reconciles with the
- * server on settle. Server state still lives in TanStack Query.
+ * Commit a drag-and-drop reorder of one list (spec §8.5). Optimistically reorders
+ * the cached list so the drag feels instant, rolls back on error, and reconciles
+ * with the server on settle. Server state still lives in TanStack Query.
  */
-export function useReorderEntries(): UseMutationResult<
-  EntryWithGame[],
-  Error,
-  number[],
-  ReorderContext
-> {
+export function useReorderEntries(
+  status: EntryStatus,
+): UseMutationResult<EntryWithGame[], Error, number[], ReorderContext> {
   const queryClient = useQueryClient();
+  const key = ['entries', status];
 
   return useMutation<EntryWithGame[], Error, number[], ReorderContext>({
-    mutationFn: (orderedIds: number[]) => entriesApi.reorder(orderedIds),
+    mutationFn: (orderedIds: number[]) => entriesApi.reorder(status, orderedIds),
     onMutate: async (orderedIds) => {
-      await queryClient.cancelQueries({ queryKey: PLAYED_KEY });
-      const previous = queryClient.getQueryData<EntryWithGame[]>(PLAYED_KEY);
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<EntryWithGame[]>(key);
       if (previous) {
-        queryClient.setQueryData(PLAYED_KEY, reorderCached(previous, orderedIds));
+        queryClient.setQueryData(key, reorderCached(previous, orderedIds));
       }
       return { previous };
     },
     onError: (_err, _ids, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(PLAYED_KEY, context.previous);
+        queryClient.setQueryData(key, context.previous);
       }
     },
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: PLAYED_KEY });
+      void queryClient.invalidateQueries({ queryKey: key });
     },
   });
 }

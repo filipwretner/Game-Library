@@ -45,8 +45,8 @@ export function makeEntriesController(entryService: EntryService): EntriesContro
       res.status(HTTP_NO_CONTENT).end();
     },
     reorder: async (req, res) => {
-      const { orderedEntryIds } = parse(reorderSchema, req.body);
-      res.json(await entryService.reorderPlayed(orderedEntryIds));
+      const { status, orderedEntryIds } = parse(reorderSchema, req.body);
+      res.json(await entryService.reorderEntries(status, orderedEntryIds));
     },
     fetchPrice: async (req, res) => {
       const { id } = parse(entryIdParamSchema, req.params);

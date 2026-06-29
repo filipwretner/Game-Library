@@ -12,6 +12,7 @@ const hades = vi.hoisted<GameSearchResult>(() => ({
   title: 'Hades',
   coverUrl: null,
   platforms: [6],
+  releaseDate: '2020-09-17T00:00:00.000Z',
 }));
 
 // Fake the api layer at its boundary (spec §11.4) — no real network.

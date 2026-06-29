@@ -32,6 +32,6 @@ export const entriesApi = {
   update: (id: number, patch: UpdateEntryBody): Promise<EntryWithGame> =>
     apiPatch<EntryWithGame>(`/entries/${id}`, patch),
   remove: (id: number): Promise<void> => apiDelete(`/entries/${id}`),
-  reorder: (orderedEntryIds: number[]): Promise<EntryWithGame[]> =>
-    apiPut<EntryWithGame[]>('/entries/rank', { orderedEntryIds }),
+  reorder: (status: EntryStatus, orderedEntryIds: number[]): Promise<EntryWithGame[]> =>
+    apiPut<EntryWithGame[]>('/entries/rank', { status, orderedEntryIds }),
 };

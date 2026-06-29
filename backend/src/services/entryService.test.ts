@@ -25,9 +25,19 @@ describe('EntryService', () => {
     const entry = await harness.container.entryService.addEntry({ igdbId: 1, status: 'BACKLOG' });
 
     expect(entry.status).toBe('BACKLOG');
-    expect(entry.rank).toBeNull();
+    expect(entry.rank).toBe(1);
     expect(entry.ownedPlatform).toBe('PC');
     expect(entry.game.title).toBe('Hades');
+  });
+
+  it('orders every list, not just Played', async () => {
+    const service = harness.container.entryService;
+    const a = await service.addEntry({ igdbId: 1, status: 'WISHLIST' });
+    const b = await service.addEntry({ igdbId: 2, status: 'WISHLIST' });
+
+    expect([a.rank, b.rank]).toEqual([1, 2]);
+    const reordered = await service.reorderEntries('WISHLIST', [b.id, a.id]);
+    expect(reordered.map((e) => e.id)).toEqual([b.id, a.id]);
   });
 
   it('derives PS5 when only PS5 is available', async () => {
@@ -77,7 +87,7 @@ describe('EntryService', () => {
     const a = await service.addEntry({ igdbId: 1, status: 'PLAYED' });
     const b = await service.addEntry({ igdbId: 2, status: 'PLAYED' });
 
-    const reordered = await service.reorderPlayed([b.id, a.id]);
+    const reordered = await service.reorderEntries('PLAYED', [b.id, a.id]);
 
     expect(reordered.map((e) => [e.id, e.rank])).toEqual([
       [b.id, 1],
@@ -89,7 +99,9 @@ describe('EntryService', () => {
     const service = harness.container.entryService;
     const a = await service.addEntry({ igdbId: 1, status: 'PLAYED' });
 
-    await expect(service.reorderPlayed([a.id, 999])).rejects.toBeInstanceOf(ValidationError);
+    await expect(service.reorderEntries('PLAYED', [a.id, 999])).rejects.toBeInstanceOf(
+      ValidationError,
+    );
   });
 
   it('rejects a reorder containing duplicate ids', async () => {
@@ -97,7 +109,9 @@ describe('EntryService', () => {
     const a = await service.addEntry({ igdbId: 1, status: 'PLAYED' });
     await service.addEntry({ igdbId: 2, status: 'PLAYED' });
 
-    await expect(service.reorderPlayed([a.id, a.id])).rejects.toBeInstanceOf(ValidationError);
+    await expect(service.reorderEntries('PLAYED', [a.id, a.id])).rejects.toBeInstanceOf(
+      ValidationError,
+    );
   });
 
   it('fetches a PC wishlist price and stores the quote', async () => {

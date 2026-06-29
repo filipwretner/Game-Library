@@ -74,7 +74,7 @@ describe('entries endpoints', () => {
 
     const res = await request(app)
       .put('/api/entries/rank')
-      .send({ orderedEntryIds: [b, a] });
+      .send({ status: 'PLAYED', orderedEntryIds: [b, a] });
 
     expect(res.status).toBe(200);
     expect(res.body.map((e: { id: number; rank: number }) => [e.id, e.rank])).toEqual([

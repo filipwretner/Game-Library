@@ -7,16 +7,19 @@ import type { MetadataProvider, MetadataSearchResult } from '../ports.js';
  * layer 5). Services depend on the port, never on this class or IGDB shapes.
  */
 
-const SEARCH_LIMIT = 10;
+const SEARCH_LIMIT = 15;
 const THUMB_SIZE = 't_thumb';
 const COVER_SIZE = 't_cover_big';
 const MS_PER_SECOND = 1000;
+/** IGDB game_type 0 = main_game. Filters out DLC/cosmetic packs, editions, etc. */
+const MAIN_GAME_TYPE = 0;
 
 interface IgdbSearchRow {
   id: number;
   name: string;
   cover?: { url?: string };
   platforms?: number[];
+  first_release_date?: number;
 }
 
 interface IgdbGameRow extends IgdbSearchRow {
@@ -45,7 +48,10 @@ export class IgdbMetadataProvider implements MetadataProvider {
 function buildSearchQuery(query: string): string {
   // Escape embedded quotes so the Apicalypse string stays well-formed.
   const safe = query.replace(/"/g, '\\"');
-  return `search "${safe}"; fields name,cover.url,platforms,first_release_date,summary; limit ${SEARCH_LIMIT};`;
+  return (
+    `search "${safe}"; fields name,cover.url,platforms,first_release_date; ` +
+    `where game_type = ${MAIN_GAME_TYPE}; limit ${SEARCH_LIMIT};`
+  );
 }
 
 function buildByIdQuery(igdbId: number): string {
@@ -58,6 +64,7 @@ function toSearchResult(row: IgdbSearchRow): MetadataSearchResult {
     title: row.name,
     coverUrl: upgradeCoverUrl(row.cover?.url),
     platforms: row.platforms ?? [],
+    releaseDate: unixToIso(row.first_release_date),
   };
 }
 
@@ -67,13 +74,15 @@ function toMetadata(row: IgdbGameRow): GameMetadata {
     title: row.name,
     coverUrl: upgradeCoverUrl(row.cover?.url),
     summary: row.summary ?? null,
-    releaseDate:
-      row.first_release_date !== undefined
-        ? new Date(row.first_release_date * MS_PER_SECOND).toISOString()
-        : null,
+    releaseDate: unixToIso(row.first_release_date),
     platforms: row.platforms ?? [],
     igdbRating: row.rating ?? null,
   };
+}
+
+/** IGDB dates are unix seconds; convert to an ISO string (or null). */
+function unixToIso(seconds: number | undefined): string | null {
+  return seconds === undefined ? null : new Date(seconds * MS_PER_SECOND).toISOString();
 }
 
 /** IGDB returns protocol-relative thumbnail URLs; upgrade to https + big art. */

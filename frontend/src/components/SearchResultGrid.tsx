@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import type { GameSearchResult } from '@game-tracker/shared';
+import { releaseYear, type GameSearchResult } from '@game-tracker/shared';
 import { PlatformBadge } from './PlatformBadge.tsx';
 import { Button } from './Button.tsx';
 
@@ -33,7 +33,14 @@ export function SearchResultGrid({
             ) : (
               <span className="text-xs text-muted">No cover</span>
             )}
-            <span className="text-sm font-medium">{game.title}</span>
+            <span className="text-sm font-medium">
+              {game.title}
+              {releaseYear(game.releaseDate) !== null && (
+                <span className="ml-1 font-normal text-muted">
+                  ({releaseYear(game.releaseDate)})
+                </span>
+              )}
+            </span>
             <PlatformBadge platforms={game.platforms} />
           </Button>
         </li>

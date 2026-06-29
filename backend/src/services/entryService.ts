@@ -72,22 +72,22 @@ export class EntryService {
   }
 
   /**
-   * Commit a drag-and-drop reorder (spec §7.5 PUT /api/entries/rank). The given
-   * ids must be exactly the current PLAYED set so a stale/partial list can't
-   * corrupt the ranking. Returns the freshly ordered list.
+   * Commit a drag-and-drop reorder of one list (spec §7.5 PUT /api/entries/rank).
+   * The given ids must be exactly the current set for that status, so a stale or
+   * partial list can't corrupt the ranking. Returns the freshly ordered list.
    */
-  async reorderPlayed(orderedEntryIds: number[]): Promise<EntryWithGame[]> {
-    const played = await this.entries.findByStatus('PLAYED');
+  async reorderEntries(status: EntryStatus, orderedEntryIds: number[]): Promise<EntryWithGame[]> {
+    const current = await this.entries.findByStatus(status);
     if (
       !isSamePermutation(
         orderedEntryIds,
-        played.map((e) => e.id),
+        current.map((e) => e.id),
       )
     ) {
-      throw new ValidationError('orderedEntryIds must match the current Played entries');
+      throw new ValidationError(`orderedEntryIds must match the current ${status} entries`);
     }
     await this.entries.setRanks(recomputeRanks(orderedEntryIds));
-    return this.entries.findByStatus('PLAYED');
+    return this.entries.findByStatus(status);
   }
 
   /**
@@ -122,7 +122,7 @@ export class EntryService {
     return { total: wishlistTotal(entries.map((e) => e.price)), currency: PRICE_CURRENCY };
   }
 
-  /** When status changes, clear the old list's fields and assign a PLAYED rank. */
+  /** When status changes, clear the old list's fields and append to the new list's order. */
   private async applyStatusTransition(
     current: EntryWithGame,
     patch: UpdateEntryInput,
@@ -130,11 +130,11 @@ export class EntryService {
     if (!patch.status || patch.status === current.status) {
       return patch;
     }
-    const moved: UpdateEntryInput = { ...resetFieldsForStatus(patch.status), ...patch };
-    if (patch.status === 'PLAYED') {
-      moved.rank = await this.nextRankFor('PLAYED');
-    }
-    return moved;
+    return {
+      ...resetFieldsForStatus(patch.status),
+      ...patch,
+      rank: await this.nextRankFor(patch.status),
+    };
   }
 
   private async resolveGame(igdbId: number): Promise<Game> {
@@ -153,9 +153,9 @@ export class EntryService {
     return input.ownedPlatform ?? preferredPlatform(game.platforms);
   }
 
-  private async nextRankFor(status: EntryStatus): Promise<number | null> {
-    if (status !== 'PLAYED') return null;
-    const max = await this.entries.maxRank('PLAYED');
+  /** Next rank to append within a list (every list is ordered now). */
+  private async nextRankFor(status: EntryStatus): Promise<number> {
+    const max = await this.entries.maxRank(status);
     return max === null ? FIRST_RANK : max + 1;
   }
 

@@ -22,6 +22,7 @@ describe('GET /api/games/search', () => {
       title: 'Hades',
       coverUrl: null,
       platforms: [6],
+      releaseDate: null,
     };
     const metadata: MetadataProvider = {
       search: vi.fn().mockResolvedValue([result]),
