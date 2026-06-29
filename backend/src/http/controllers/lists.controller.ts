@@ -14,6 +14,7 @@ const HTTP_NO_CONTENT = 204;
 
 export interface ListsController {
   list: AsyncRequestHandler;
+  get: AsyncRequestHandler;
   create: AsyncRequestHandler;
   remove: AsyncRequestHandler;
   entries: AsyncRequestHandler;
@@ -27,6 +28,10 @@ export function makeListsController(service: CustomListService): ListsController
   return {
     list: async (_req, res) => {
       res.json(await service.listLists());
+    },
+    get: async (req, res) => {
+      const { id } = parse(listIdParamSchema, req.params);
+      res.json(await service.getList(id));
     },
     create: async (req, res) => {
       const { title } = parse(createListSchema, req.body);

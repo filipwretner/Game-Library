@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { EntryWithGame } from '../../types/index.ts';
 import { entriesApi, type UpdateEntryBody } from '../../api/entriesApi.ts';
+import { entryKeys } from '../entryKeys.ts';
 
 export interface UpdateEntryVars {
   id: number;
@@ -13,7 +14,7 @@ export function useUpdateEntry(): UseMutationResult<EntryWithGame, Error, Update
   return useMutation({
     mutationFn: ({ id, patch }: UpdateEntryVars) => entriesApi.update(id, patch),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['entries'] });
+      void queryClient.invalidateQueries({ queryKey: entryKeys.all });
     },
   });
 }

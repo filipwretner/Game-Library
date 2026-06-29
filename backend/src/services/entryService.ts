@@ -56,7 +56,7 @@ export class EntryService {
       dateCompleted: input.dateCompleted ?? null,
       notes: input.notes ?? null,
     });
-    return this.requireById(created.id);
+    return { ...created, game };
   }
 
   async updateEntry(id: number, patch: UpdateEntryInput): Promise<EntryWithGame> {

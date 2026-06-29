@@ -21,6 +21,7 @@ const searchHit = vi.hoisted((): GameSearchResult => ({
 
 const listsMock = vi.hoisted(() => ({
   list: vi.fn(),
+  get: vi.fn(),
   create: vi.fn(),
   remove: vi.fn(),
   entries: vi.fn(),
@@ -45,6 +46,7 @@ describe('ListsView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     listsMock.list.mockResolvedValue([list]);
+    listsMock.get.mockResolvedValue(list);
     listsMock.entries.mockResolvedValue([]);
     listsMock.create.mockResolvedValue(list);
     gamesMock.search.mockResolvedValue([]);

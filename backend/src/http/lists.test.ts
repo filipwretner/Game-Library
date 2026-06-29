@@ -28,6 +28,10 @@ describe('custom list endpoints', () => {
     expect(created.status).toBe(201);
     const listId = created.body.id as number;
 
+    const fetched = await request(app).get(`/api/lists/${listId}`);
+    expect(fetched.status).toBe(200);
+    expect(fetched.body.title).toBe('Top 10 of 2024');
+
     const a = await request(app).post(`/api/lists/${listId}/entries`).send({ igdbId: 1 });
     const b = await request(app).post(`/api/lists/${listId}/entries`).send({ igdbId: 2 });
     expect(a.status).toBe(201);

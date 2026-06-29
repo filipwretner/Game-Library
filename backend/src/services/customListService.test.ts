@@ -22,8 +22,8 @@ describe('CustomListService', () => {
     service = buildTestHarness([gameA, gameB]).container.customListService;
   });
 
-  it('creates a list (trimming the title) and lists it', async () => {
-    const list = await service.createList('  Top 10 of 2024  ');
+  it('creates a list and lists it', async () => {
+    const list = await service.createList('Top 10 of 2024');
     expect(list.title).toBe('Top 10 of 2024');
     expect(await service.listLists()).toHaveLength(1);
   });

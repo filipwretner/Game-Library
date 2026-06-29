@@ -1,10 +1,8 @@
 import type { JSX } from 'react';
 import type { GameSearchResult } from '../../types/index.ts';
-import { useCustomLists, useCustomListEntries } from '../../hooks/queries/useCustomLists.ts';
-import {
-  useAddListEntry,
-  useRemoveListEntry,
-} from '../../hooks/mutations/useCustomListMutations.ts';
+import { useCustomList, useCustomListEntries } from '../../hooks/queries/useCustomLists.ts';
+import { useAddListEntry } from '../../hooks/mutations/useAddListEntry.ts';
+import { useRemoveListEntry } from '../../hooks/mutations/useRemoveListEntry.ts';
 import { useReorderListEntries } from '../../hooks/mutations/useReorderListEntries.ts';
 import { AddGameModal } from '../add-game/AddGameModal.tsx';
 import { SortableList } from '../../components/SortableList.tsx';
@@ -20,13 +18,13 @@ interface ListDetailProps {
 
 /** One custom list: title heading + Played-style add and drag-to-reorder. */
 export function ListDetail({ listId, onBack }: Readonly<ListDetailProps>): JSX.Element {
-  const { data: lists } = useCustomLists();
+  const { data: list } = useCustomList(listId);
   const { data: entries, isPending, isError } = useCustomListEntries(listId);
   const addEntry = useAddListEntry(listId);
   const removeEntry = useRemoveListEntry(listId);
   const reorder = useReorderListEntries(listId);
 
-  const title = lists?.find((l) => l.id === listId)?.title ?? 'List';
+  const title = list?.title ?? 'List';
   const actionError = firstErrorMessage([addEntry, removeEntry, reorder]);
   const handleAdd = (game: GameSearchResult): void => {
     addEntry.mutate(game.igdbId);

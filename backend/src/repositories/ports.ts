@@ -57,6 +57,7 @@ export interface CustomListsRepo {
   findListById(id: number): Promise<CustomList | null>;
   deleteList(id: number): Promise<void>;
   findEntriesByList(listId: number): Promise<CustomListEntryWithGame[]>;
+  findEntryById(entryId: number): Promise<CustomListEntry | null>;
   findEntryByGame(listId: number, gameId: number): Promise<CustomListEntry | null>;
   maxRank(listId: number): Promise<number | null>;
   addEntry(input: { listId: number; gameId: number; rank: number }): Promise<CustomListEntry>;

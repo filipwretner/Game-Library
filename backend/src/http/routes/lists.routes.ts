@@ -9,6 +9,7 @@ export function listsRoutes(service: CustomListService): Router {
 
   router.get('/lists', asyncHandler(controller.list));
   router.post('/lists', asyncHandler(controller.create));
+  router.get('/lists/:id', asyncHandler(controller.get));
   router.delete('/lists/:id', asyncHandler(controller.remove));
   router.get('/lists/:id/entries', asyncHandler(controller.entries));
   router.post('/lists/:id/entries', asyncHandler(controller.addEntry));

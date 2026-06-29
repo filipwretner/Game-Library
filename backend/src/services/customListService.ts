@@ -18,11 +18,16 @@ export class CustomListService {
   ) {}
 
   createList(title: string): Promise<CustomList> {
-    return this.lists.createList(title.trim());
+    // Title is already trimmed + non-empty by the Zod schema at the boundary.
+    return this.lists.createList(title);
   }
 
   listLists(): Promise<CustomList[]> {
     return this.lists.findAllLists();
+  }
+
+  getList(id: number): Promise<CustomList> {
+    return this.requireList(id);
   }
 
   async getEntries(listId: number): Promise<CustomListEntryWithGame[]> {
@@ -38,8 +43,12 @@ export class CustomListService {
     if (existing) {
       throw new ConflictError('Game is already on this list');
     }
-    await this.lists.addEntry({ listId, gameId: game.id, rank: await this.nextRank(listId) });
-    return this.requireEntry(listId, game.id);
+    const created = await this.lists.addEntry({
+      listId,
+      gameId: game.id,
+      rank: await this.nextRank(listId),
+    });
+    return { ...created, game };
   }
 
   async reorder(listId: number, orderedEntryIds: number[]): Promise<CustomListEntryWithGame[]> {
@@ -57,8 +66,8 @@ export class CustomListService {
   }
 
   async removeEntry(listId: number, entryId: number): Promise<void> {
-    const entries = await this.getEntries(listId);
-    if (!entries.some((e) => e.id === entryId)) {
+    const entry = await this.lists.findEntryById(entryId);
+    if (!entry || entry.listId !== listId) {
       throw new NotFoundError(`Entry ${entryId} not found on list ${listId}`);
     }
     await this.lists.deleteEntry(entryId);
@@ -80,14 +89,5 @@ export class CustomListService {
       throw new NotFoundError(`List ${id} not found`);
     }
     return list;
-  }
-
-  private async requireEntry(listId: number, gameId: number): Promise<CustomListEntryWithGame> {
-    const entries = await this.lists.findEntriesByList(listId);
-    const entry = entries.find((e) => e.gameId === gameId);
-    if (!entry) {
-      throw new NotFoundError('Entry not found after insert');
-    }
-    return entry;
   }
 }

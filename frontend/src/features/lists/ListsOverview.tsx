@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { useCustomLists } from '../../hooks/queries/useCustomLists.ts';
-import { useCreateList, useDeleteList } from '../../hooks/mutations/useCustomListMutations.ts';
+import { useCreateList } from '../../hooks/mutations/useCreateList.ts';
+import { useDeleteList } from '../../hooks/mutations/useDeleteList.ts';
 import { CreateListForm } from '../../components/CreateListForm.tsx';
 import { ListHeader } from '../../components/ListHeader.tsx';
 import { Button } from '../../components/Button.tsx';

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { EntryStatus, EntryWithGame } from '../../types/index.ts';
 import { entriesApi } from '../../api/entriesApi.ts';
+import { entryKeys } from '../entryKeys.ts';
 
 export interface MoveEntryVars {
   id: number;
@@ -19,7 +20,7 @@ export function useMoveEntry(): UseMutationResult<EntryWithGame, Error, MoveEntr
     mutationFn: ({ id, status, dateCompleted }: MoveEntryVars) =>
       entriesApi.update(id, { status, dateCompleted }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['entries'] });
+      void queryClient.invalidateQueries({ queryKey: entryKeys.all });
     },
   });
 }

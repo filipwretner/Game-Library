@@ -4,6 +4,7 @@ import { apiDelete, apiGet, apiPost, apiPut } from './client.ts';
 /** Typed wrappers for the custom-list endpoints (spec §8.1). Only place that knows URLs. */
 export const listsApi = {
   list: (): Promise<CustomList[]> => apiGet<CustomList[]>('/lists'),
+  get: (id: number): Promise<CustomList> => apiGet<CustomList>(`/lists/${id}`),
   create: (title: string): Promise<CustomList> => apiPost<CustomList>('/lists', { title }),
   remove: (id: number): Promise<void> => apiDelete(`/lists/${id}`),
   entries: (listId: number): Promise<CustomListEntryWithGame[]> =>

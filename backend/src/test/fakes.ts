@@ -190,6 +190,10 @@ export class InMemoryCustomListsRepo implements CustomListsRepo {
     return Promise.resolve(list);
   }
 
+  findEntryById(entryId: number): Promise<CustomListEntry | null> {
+    return Promise.resolve(this.entries.find((e) => e.id === entryId) ?? null);
+  }
+
   findEntryByGame(listId: number, gameId: number): Promise<CustomListEntry | null> {
     return Promise.resolve(
       this.entries.find((e) => e.listId === listId && e.gameId === gameId) ?? null,

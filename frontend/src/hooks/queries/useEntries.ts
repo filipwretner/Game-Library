@@ -1,11 +1,12 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { EntryStatus, EntryWithGame } from '../../types/index.ts';
 import { entriesApi } from '../../api/entriesApi.ts';
+import { entryKeys } from '../entryKeys.ts';
 
 /** Read the entries on one list (spec §8.1 query hook). Server state stays in the cache. */
 export function useEntries(status: EntryStatus): UseQueryResult<EntryWithGame[]> {
   return useQuery({
-    queryKey: ['entries', status],
+    queryKey: entryKeys.list(status),
     queryFn: () => entriesApi.list(status),
   });
 }

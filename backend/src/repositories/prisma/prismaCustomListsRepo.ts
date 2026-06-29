@@ -34,6 +34,11 @@ export class PrismaCustomListsRepo implements CustomListsRepo {
     return rows.map(toCustomListEntryWithGame);
   }
 
+  async findEntryById(entryId: number): Promise<CustomListEntry | null> {
+    const row = await this.prisma.customListEntry.findUnique({ where: { id: entryId } });
+    return row ? toCustomListEntry(row) : null;
+  }
+
   async findEntryByGame(listId: number, gameId: number): Promise<CustomListEntry | null> {
     const row = await this.prisma.customListEntry.findUnique({
       where: { listId_gameId: { listId, gameId } },
